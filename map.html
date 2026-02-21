@@ -1,0 +1,710 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Last of Us - Apocalypse Territory Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #888;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.95);
+            padding: 12px 20px;
+            border-bottom: 2px solid #3a3a2a;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 18px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .coordinates {
+            font-size: 11px;
+            color: #4a4a3a;
+            letter-spacing: 1px;
+        }
+
+        .legend-bar {
+            position: absolute;
+            top: 50px;
+            left: 0;
+            right: 0;
+            background: rgba(15, 15, 15, 0.9);
+            padding: 8px 20px;
+            border-bottom: 1px solid #2a2a2a;
+            z-index: 99;
+            display: flex;
+            gap: 30px;
+            font-size: 10px;
+            color: #666;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .map-container {
+            position: absolute;
+            top: 90px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: auto;
+        }
+
+        .map-canvas {
+            position: relative;
+            width: 3200px;
+            height: 2400px;
+            margin: 0 auto;
+            background: 
+                radial-gradient(ellipse at 30% 20%, rgba(40, 35, 25, 0.3) 0%, transparent 40%),
+                radial-gradient(ellipse at 70% 80%, rgba(25, 30, 35, 0.3) 0%, transparent 40%),
+                linear-gradient(180deg, #1a1a15 0%, #141410 50%, #0f0f0a 100%);
+            image-rendering: auto;
+        }
+
+        /* Terrain textures */
+        .terrain-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent 0px, transparent 40px, rgba(50, 45, 30, 0.03) 40px, rgba(50, 45, 30, 0.03) 41px),
+                repeating-linear-gradient(90deg, transparent 0px, transparent 40px, rgba(50, 45, 30, 0.03) 40px, rgba(50, 45, 30, 0.03) 41px);
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Water bodies - dark blue/black */
+        .water {
+            position: absolute;
+            background: radial-gradient(ellipse at center, #0a1520 0%, #050a12 100%);
+            border: 1px solid #0f1a25;
+            box-shadow: inset 0 0 30px rgba(0, 10, 20, 0.8);
+            pointer-events: none;
+        }
+
+        .river {
+            position: absolute;
+            background: linear-gradient(90deg, #0a1520, #0d1823, #0a1520);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Roads - dashed white lines */
+        .road {
+            position: absolute;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                transparent 15px,
+                rgba(200, 200, 200, 0.4) 15px,
+                rgba(200, 200, 200, 0.4) 25px
+            );
+            height: 3px;
+            pointer-events: none;
+            transform-origin: left center;
+        }
+
+        .road-main {
+            height: 4px;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                transparent 20px,
+                rgba(230, 230, 230, 0.5) 20px,
+                rgba(230, 230, 230, 0.5) 35px
+            );
+        }
+
+        /* Location markers - minimal glow */
+        .location {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .location:hover {
+            transform: scale(1.4);
+            z-index: 50;
+        }
+
+        .location-icon {
+            width: 100%;
+            height: 100%;
+            background: rgba(180, 160, 120, 0.3);
+            border: 2px solid rgba(200, 180, 140, 0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            box-shadow: 0 0 3px rgba(180, 160, 120, 0.3);
+            position: relative;
+        }
+
+        /* Reduced lighting effects */
+        .location-icon.danger {
+            background: rgba(120, 40, 40, 0.3);
+            border-color: rgba(150, 50, 50, 0.5);
+            box-shadow: 0 0 2px rgba(150, 50, 50, 0.4);
+        }
+
+        .location-icon.safe {
+            background: rgba(60, 80, 60, 0.3);
+            border-color: rgba(80, 100, 80, 0.5);
+            box-shadow: 0 0 2px rgba(80, 100, 80, 0.3);
+        }
+
+        .location-icon.caution {
+            background: rgba(120, 100, 60, 0.3);
+            border-color: rgba(140, 120, 70, 0.5);
+            box-shadow: 0 0 2px rgba(140, 120, 70, 0.3);
+        }
+
+        .location-icon.military {
+            background: rgba(80, 80, 100, 0.3);
+            border-color: rgba(100, 100, 120, 0.5);
+            box-shadow: 0 0 2px rgba(100, 100, 120, 0.3);
+        }
+
+        .location-label {
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            color: #888;
+            white-space: nowrap;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+            font-weight: normal;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2px 6px;
+            border-radius: 2px;
+        }
+
+        .location:hover .location-label {
+            opacity: 1;
+        }
+
+        /* Connection lines - subtle */
+        .connection-line {
+            position: absolute;
+            height: 1px;
+            background: rgba(100, 90, 70, 0.15);
+            transform-origin: left center;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .info-panel {
+            position: fixed;
+            right: -420px;
+            top: 90px;
+            width: 400px;
+            background: rgba(10, 10, 10, 0.97);
+            border: 1px solid #3a3a2a;
+            border-right: none;
+            padding: 20px;
+            max-height: calc(100vh - 110px);
+            overflow-y: auto;
+            transition: right 0.3s ease;
+            z-index: 90;
+            box-shadow: -3px 0 15px rgba(0, 0, 0, 0.9);
+        }
+
+        .info-panel.active {
+            right: 0;
+        }
+
+        .info-panel h2 {
+            color: #888;
+            font-size: 16px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #3a3a2a;
+            padding-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .info-panel .status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            border: 1px solid;
+        }
+
+        .status.danger { 
+            background: rgba(120, 40, 40, 0.3); 
+            color: #c66; 
+            border-color: #933;
+        }
+        .status.caution { 
+            background: rgba(120, 100, 60, 0.3); 
+            color: #ca8; 
+            border-color: #a86;
+        }
+        .status.safe { 
+            background: rgba(60, 80, 60, 0.3); 
+            color: #8b8; 
+            border-color: #686;
+        }
+        .status.military { 
+            background: rgba(80, 80, 100, 0.3); 
+            color: #99c; 
+            border-color: #779;
+        }
+
+        .info-panel p {
+            color: #777;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            font-size: 12px;
+        }
+
+        .info-panel .resources {
+            background: rgba(50, 45, 35, 0.2);
+            padding: 10px;
+            border-left: 2px solid #4a4a3a;
+            margin-top: 12px;
+        }
+
+        .info-panel .resources h3 {
+            color: #666;
+            font-size: 11px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(120, 40, 40, 0.5);
+            border: 1px solid #933;
+            color: #c66;
+            width: 24px;
+            height: 24px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            line-height: 22px;
+            text-align: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(150, 50, 50, 0.7);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(10, 10, 10, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3a3a2a;
+            border-radius: 3px;
+        }
+
+        /* Area labels */
+        .area-label {
+            position: absolute;
+            font-size: 24px;
+            color: rgba(100, 90, 70, 0.3);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Grid coordinates */
+        .grid-label {
+            position: absolute;
+            font-size: 10px;
+            color: rgba(100, 90, 70, 0.2);
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="title">⚠ OUTBREAK ZONE MAPPING SYSTEM - CONTINENTAL UNITED STATES ⚠</div>
+                <div class="coordinates">LAT: 40.7128° N | LONG: 74.0060° W | YEAR: 20 POST-OUTBREAK</div>
+            </div>
+        </div>
+
+        <div class="legend-bar">
+            <div class="legend-item">
+                <div class="legend-dot" style="background: rgba(150, 50, 50, 0.8);"></div>
+                <span>HIGH RISK - HEAVY INFECTED</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: rgba(140, 120, 70, 0.8);"></div>
+                <span>MODERATE RISK - PROCEED WITH CAUTION</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: rgba(80, 100, 80, 0.8);"></div>
+                <span>RELATIVELY SAFE - SECURED</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: rgba(100, 100, 120, 0.8);"></div>
+                <span>MILITARY/FEDRA ZONE</span>
+            </div>
+            <div class="legend-item">
+                <span style="color: #0a7;">━━━ RIVER</span>
+            </div>
+            <div class="legend-item">
+                <span style="color: #ccc;">- - - ROAD</span>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div class="map-canvas" id="mapCanvas">
+                <div class="terrain-overlay"></div>
+            </div>
+        </div>
+
+        <div class="info-panel" id="infoPanel">
+            <button class="close-btn" onclick="closePanel()">×</button>
+            <div id="panelContent">
+                <h2>Select a Location</h2>
+                <p>Click on any location marker to view details.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const locations = [
+            // NORTHEAST REGION
+            { name: "Boston QZ", x: 2600, y: 400, icon: "🏙️", status: "military", description: "Boston Quarantine Zone. FEDRA controlled. Heavy military presence. Firefly resistance active underground.", resources: "Medical: Limited | Food: Rationed | Security: Maximum" },
+            { name: "State House", x: 2620, y: 380, icon: "🏛️", status: "danger", description: "Massachusetts State House. Overrun with infected. Clicker nests in basement levels.", resources: "Supplies: High Risk | Infected: Clickers/Bloaters" },
+            { name: "Boston Harbor", x: 2700, y: 420, icon: "⚓", status: "caution", description: "Abandoned port. Shipping containers may hold supplies. Occasional raider activity.", resources: "Scavenging: Moderate | Water Access" },
+            { name: "Cambridge Labs", x: 2550, y: 370, icon: "🔬", status: "danger", description: "University research facility. Former Firefly lab. Contaminated with spores.", resources: "Medical Research: High Value | Extreme Danger" },
+            { name: "Salem Outpost", x: 2650, y: 320, icon: "🏘️", status: "caution", description: "Coastal survivor settlement. Fishing community. Trade possible.", resources: "Food: Fish | Trade: Active" },
+            
+            // NEW YORK REGION
+            { name: "NYC Ruins", x: 2500, y: 600, icon: "🌃", status: "danger", description: "Manhattan island completely overrun. Towers are death traps. Only experienced survivors venture here.", resources: "High Value Loot | Extreme Infected Density" },
+            { name: "Subway System", x: 2480, y: 620, icon: "🚇", status: "danger", description: "Underground metro network. Total darkness. Rat swarms and infected.", resources: "Travel Route | Clickers Present" },
+            { name: "Central Park", x: 2520, y: 590, icon: "🌳", status: "caution", description: "Overgrown wilderness in heart of city. Nature reclaiming concrete. Hidden camps.", resources: "Shelter: Hidden | Fresh Water Possible" },
+            { name: "Brooklyn Bridge Camp", x: 2540, y: 630, icon: "🌉", status: "caution", description: "Survivor camp on bridge supports. Defensive position. Toll for passage.", resources: "Trade: Bridge Crossing | Security: Moderate" },
+            
+            // PENNSYLVANIA REGION  
+            { name: "Pittsburgh QZ (Fallen)", x: 2200, y: 700, icon: "🏭", status: "danger", description: "Failed quarantine zone. Hunter gangs control territory. Cannibalism reported.", resources: "Hostiles: Hunter Gangs | Avoid if Possible" },
+            { name: "Steel Mill", x: 2180, y: 720, icon: "⚙️", status: "danger", description: "Abandoned industrial complex. Good for metal scavenging. Structural instability.", resources: "Scrap Metal | Building Materials" },
+            { name: "Three Rivers Junction", x: 2220, y: 710, icon: "🛤️", status: "caution", description: "Strategic waterway intersection. Former FEDRA checkpoint.", resources: "Travel Hub | Water Access" },
+            { name: "Allegheny Forest", x: 2150, y: 650, icon: "🌲", status: "safe", description: "Dense woodland. Hunter camps and natural resources. Relatively safe from infected.", resources: "Hunting: Deer | Lumber | Shelter" },
+            
+            // OHIO/MIDWEST REGION
+            { name: "Cleveland Docks", x: 2000, y: 650, icon: "🚢", status: "caution", description: "Lake Erie port. Cargo ships beached. Weather-worn supplies.", resources: "Shipping Containers | Lake Fish" },
+            { name: "Akron Suburbs", x: 2050, y: 700, icon: "🏘️", status: "caution", description: "Residential sprawl. Good scavenging. Neighborhood watch patrols.", resources: "Household Supplies | Shelter" },
+            { name: "Toledo Checkpoint", x: 1900, y: 680, icon: "🛡️", status: "military", description: "Active FEDRA border station. Heavily fortified. Papers required.", resources: "Military Supplies | Border Control" },
+            
+            // VIRGINIA/CAPITAL REGION
+            { name: "Washington DC Ruins", x: 2400, y: 800, icon: "🏛️", status: "danger", description: "Capital wasteland. Government buildings stripped. Infected hordes.", resources: "Political Artifacts | Heavy Infected" },
+            { name: "Pentagon Fortress", x: 2380, y: 820, icon: "🔺", status: "military", description: "Military stronghold. Unknown occupants. Heavily defended perimeter.", resources: "Military Arsenal | No Entry" },
+            { name: "Arlington Cemetery", x: 2360, y: 810, icon: "⚰️", status: "danger", description: "Mass grave site. Spore clouds linger. Avoid during fog.", resources: "Memorial Site | Spore Risk" },
+            { name: "Blue Ridge Camp", x: 2300, y: 850, icon: "⛺", status: "safe", description: "Mountain survivor community. Self-sufficient. Trading post.", resources: "Food: Agriculture | Security: Good" },
+            
+            // CAROLINA REGION
+            { name: "Charlotte Settlement", x: 2200, y: 950, icon: "🏘️", status: "safe", description: "Walled community. Solar power. Growing population.", resources: "Power: Solar | Population: 400+" },
+            { name: "Asheville Outpost", x: 2150, y: 920, icon: "🏔️", status: "safe", description: "Mountain town. Brewery still operational. Music and culture preserved.", resources: "Alcohol: Brewery | Culture: Active" },
+            { name: "Raleigh Labs", x: 2300, y: 980, icon: "🔬", status: "caution", description: "Research Triangle facility. Abandoned. Chemical hazards.", resources: "Research Materials | Hazmat Required" },
+            
+            // FLORIDA REGION
+            { name: "Atlanta Ruins", x: 2000, y: 1100, icon: "🌆", status: "danger", description: "Southern metropolis fallen to infected. CDC headquarters lost.", resources: "Medical Research | Disease Risk" },
+            { name: "Savannah Port", x: 2100, y: 1150, icon: "⚓", status: "caution", description: "Coastal trading post. Boat access to islands. Pirate activity.", resources: "Naval: Boats | Trade: Maritime" },
+            { name: "Jacksonville Base", x: 2150, y: 1250, icon: "🏖️", status: "military", description: "Former naval station. FEDRA maintains small presence.", resources: "Naval Supplies | Coastal Defense" },
+            { name: "Miami Beach Ruins", x: 2100, y: 1400, icon: "🌴", status: "danger", description: "Tropical paradise turned nightmare. Hurricane damage. Infected thrive in humidity.", resources: "Coastal Resources | Hurricane Risk" },
+            { name: "Everglades Edge", x: 2000, y: 1380, icon: "🐊", status: "caution", description: "Swamp boundary. Natural barrier to infected. Unique ecosystem.", resources: "Fishing | Alligators | Herbs" },
+            
+            // TENNESSEE/KENTUCKY REGION
+            { name: "Nashville Soundstage", x: 1800, y: 1000, icon: "🎸", status: "safe", description: "Music city survivors keep culture alive. Fortified entertainment district.", resources: "Morale: High | Trade: Music/Art" },
+            { name: "Knoxville Junction", x: 1950, y: 950, icon: "🚂", status: "caution", description: "Railroad hub. Trains provide shelter. Hobo camps.", resources: "Rail Transport | Transient Population" },
+            { name: "Louisville Distillery", x: 1750, y: 880, icon: "🥃", status: "safe", description: "Bourbon distillery converted to settlement. Valuable trade commodity.", resources: "Alcohol: Bourbon | Trade: High Value" },
+            
+            // TEXAS REGION
+            { name: "Dallas Fortress", x: 1200, y: 1300, icon: "🏢", status: "military", description: "Major FEDRA stronghold. Large quarantine zone. Strict martial law.", resources: "Military: Heavy Presence | QZ: Large" },
+            { name: "Austin Community", x: 1150, y: 1400, icon: "🎓", status: "safe", description: "University town. Knowledge preservation. Library maintained.", resources: "Education: Library | Community: Strong" },
+            { name: "Houston Refinery", x: 1250, y: 1450, icon: "🏭", status: "danger", description: "Oil processing plant. Fires still burn. Toxic air.", resources: "Fuel: Gasoline | Air: Toxic" },
+            { name: "San Antonio Mission", x: 1100, y: 1420, icon: "⛪", status: "safe", description: "Historic mission converted to sanctuary. Religious community.", resources: "Shelter: Church | Medical Care" },
+            
+            // COLORADO/WYOMING REGION
+            { name: "Denver QZ", x: 1000, y: 800, icon: "🏙️", status: "military", description: "Mountain quarantine zone. Altitude advantage. FEDRA control.", resources: "Military: FEDRA | Altitude: Safe" },
+            { name: "University of Eastern Colorado", x: 1050, y: 820, icon: "🎓", status: "danger", description: "Former Firefly research lab. Infected test subjects. Abandoned.", resources: "Research: Vaccine Related | Danger: High" },
+            { name: "Tommy's Dam", x: 900, y: 700, icon: "⚡", status: "safe", description: "Hydroelectric facility. Provides power to Jackson. Well defended.", resources: "Power: Hydroelectric | Security: Excellent" },
+            { name: "Jackson County", x: 850, y: 650, icon: "🏔️", status: "safe", description: "Mountain community. Best settlement in region. Self-sufficient.", resources: "Food: Agriculture | Population: 300 | Quality: Best" },
+            { name: "Rocky Mountain Lodge", x: 950, y: 750, icon: "🏔️", status: "safe", description: "Ski resort turned settlement. Winter sports equipment useful.", resources: "Shelter: Lodges | Winter Gear" },
+            { name: "Cheyenne Outpost", x: 1100, y: 700, icon: "🏘️", status: "caution", description: "Plains settlement. Wind power. Tornado risk.", resources: "Power: Wind | Weather: Severe" },
+            
+            // WEST COAST / WASHINGTON REGION
+            { name: "Seattle Downtown", x: 200, y: 400, icon: "🌃", status: "danger", description: "WLF territory. Territory war with Seraphites. Constant combat.", resources: "Military: WLF | Hostiles: High" },
+            { name: "Seattle Aquarium", x: 180, y: 450, icon: "🐠", status: "caution", description: "WLF forward base. Medical facilities. Ocean views.", resources: "Medical: Field Hospital | WLF Base" },
+            { name: "Space Needle", x: 220, y: 380, icon: "🗼", status: "danger", description: "Landmark tower. Sniper position. Heavily contested.", resources: "Vantage Point | Strategic Location" },
+            { name: "Seraphite Island", x: 150, y: 500, icon: "🏝️", status: "danger", description: "Cult stronghold. Hostile to outsiders. Bow and arrow specialists.", resources: "Hostiles: Seraphites | Arrows: Bow Combat" },
+            { name: "Pike Place Market", x: 190, y: 420, icon: "🐟", status: "danger", description: "Former market now battleground. Constant skirmishes.", resources: "Scavenging: Urban | Combat Zone" },
+            
+            // OREGON/NORTHWEST
+            { name: "Portland Bridges", x: 250, y: 550, icon: "🌉", status: "caution", description: "River crossing controlled by toll gangs. Trade route.", resources: "Trade: River Crossing | Toll Required" },
+            { name: "Eugene Community", x: 220, y: 620, icon: "🏘️", status: "safe", description: "Peaceful settlement. Focus on education and art.", resources: "Education | Art | Peaceful" },
+            { name: "Crater Lake", x: 280, y: 700, icon: "🌊", status: "safe", description: "Pristine water source. Remote location. Natural beauty preserved.", resources: "Fresh Water | Fishing | Isolated" },
+            
+            // CALIFORNIA REGION
+            { name: "San Francisco Ruins", x: 150, y: 850, icon: "🌉", status: "danger", description: "Earthquake damaged city. Golden Gate collapsed. Heavily infected.", resources: "Urban Scavenging | Structural Risk" },
+            { name: "Silicon Valley Labs", x: 180, y: 880, icon: "💻", status: "caution", description: "Tech campuses abandoned. Server rooms, electronics.", resources: "Technology | Electronics | Data" },
+            { name: "Yosemite Valley", x: 300, y: 950, icon: "⛰️", status: "safe", description: "National park. Nature untouched. Small eco-community.", resources: "Nature: Pristine | Hunting | Lumber" },
+            { name: "Los Angeles Wasteland", x: 200, y: 1100, icon: "🎬", status: "danger", description: "Sprawling urban ruins. Gang territories. Hollywood sign fallen.", resources: "Urban Scavenging | Gang Territories" },
+            { name: "San Diego Border", x: 250, y: 1200, icon: "🛡️", status: "military", description: "Southern border checkpoint. Military presence. Mexico passage.", resources: "Military: Border | Trade: International" },
+            
+            // NEVADA/DESERT REGION
+            { name: "Las Vegas Ruins", x: 450, y: 1000, icon: "🎰", status: "danger", description: "Desert city buried in sand. Casinos stripped. Raider haven.", resources: "Scavenging: Casinos | Raiders: Active" },
+            { name: "Hoover Dam", x: 500, y: 1050, icon: "⚡", status: "military", description: "Critical power facility. Heavily defended. Territory disputed.", resources: "Power: Major | Strategic Importance" },
+            { name: "Area 51 Facility", x: 420, y: 980, icon: "👽", status: "military", description: "Military research base. Access denied. Unknown activities.", resources: "Military: Top Secret | Restricted" },
+            
+            // ARIZONA/NEW MEXICO
+            { name: "Phoenix Settlement", x: 600, y: 1150, icon: "🌵", status: "caution", description: "Desert community. Water scarcity issues. Solar farms.", resources: "Power: Solar | Water: Limited" },
+            { name: "Santa Fe Pueblo", x: 850, y: 1200, icon: "🏺", status: "safe", description: "Native American community. Traditional survival methods.", resources: "Culture: Preserved | Community: Tight" },
+            { name: "Albuquerque Labs", x: 800, y: 1180, icon: "🔬", status: "caution", description: "Research facility. Chemical storage. Hazmat situation.", resources: "Chemicals | Research | Danger" }
+        ];
+
+        const mapCanvas = document.getElementById('mapCanvas');
+        const infoPanel = document.getElementById('infoPanel');
+        const panelContent = document.getElementById('panelContent');
+
+        // Create water bodies (lakes, rivers)
+        function createWaterBodies() {
+            const waters = [
+                // Great Lakes region
+                { x: 1800, y: 500, width: 400, height: 200, type: 'lake' },
+                { x: 2100, y: 550, width: 300, height: 150, type: 'lake' },
+                
+                // Eastern rivers
+                { x: 2400, y: 300, width: 250, height: 800, type: 'river', angle: 15 },
+                { x: 2200, y: 600, width: 180, height: 600, type: 'river', angle: 5 },
+                
+                // Mississippi
+                { x: 1600, y: 400, width: 120, height: 1200, type: 'river', angle: -5 },
+                
+                // West coast
+                { x: 300, y: 400, width: 350, height: 180, type: 'lake' },
+            ];
+
+            waters.forEach(water => {
+                const waterDiv = document.createElement('div');
+                waterDiv.className = 'water';
+                waterDiv.style.left = water.x + 'px';
+                waterDiv.style.top = water.y + 'px';
+                waterDiv.style.width = water.width + 'px';
+                waterDiv.style.height = water.height + 'px';
+                if (water.angle) {
+                    waterDiv.style.transform = `rotate(${water.angle}deg)`;
+                }
+                if (water.type === 'river') {
+                    waterDiv.style.borderRadius = '40%';
+                }
+                mapCanvas.appendChild(waterDiv);
+            });
+        }
+
+        // Create road network
+        function createRoads() {
+            const roads = [
+                // Major east-west highways
+                { x: 200, y: 600, length: 2400, angle: 0, main: true },
+                { x: 300, y: 1000, length: 1800, angle: 5, main: true },
+                { x: 500, y: 400, length: 2000, angle: -2, main: true },
+                
+                // North-south routes
+                { x: 1000, y: 200, length: 1600, angle: 90, main: true },
+                { x: 2200, y: 300, length: 1400, angle: 85, main: true },
+                { x: 600, y: 600, length: 800, angle: 95, main: false },
+                
+                // Connecting roads
+                { x: 800, y: 800, length: 600, angle: 45, main: false },
+                { x: 1400, y: 1200, length: 500, angle: 135, main: false },
+                { x: 2000, y: 900, length: 400, angle: 60, main: false },
+            ];
+
+            roads.forEach(road => {
+                const roadDiv = document.createElement('div');
+                roadDiv.className = road.main ? 'road road-main' : 'road';
+                roadDiv.style.left = road.x + 'px';
+                roadDiv.style.top = road.y + 'px';
+                roadDiv.style.width = road.length + 'px';
+                roadDiv.style.transform = `rotate(${road.angle}deg)`;
+                mapCanvas.appendChild(roadDiv);
+            });
+        }
+
+        // Create area labels
+        function createAreaLabels() {
+            const areas = [
+                { text: 'PACIFIC NORTHWEST', x: 150, y: 300 },
+                { text: 'MIDWEST', x: 1400, y: 600 },
+                { text: 'NORTHEAST', x: 2400, y: 300 },
+                { text: 'SOUTHWEST', x: 600, y: 1300 },
+                { text: 'SOUTHEAST', x: 2100, y: 1200 },
+                { text: 'ROCKY MOUNTAINS', x: 900, y: 800 },
+            ];
+
+            areas.forEach(area => {
+                const label = document.createElement('div');
+                label.className = 'area-label';
+                label.textContent = area.text;
+                label.style.left = area.x + 'px';
+                label.style.top = area.y + 'px';
+                mapCanvas.appendChild(label);
+            });
+        }
+
+        // Draw minimal connection lines
+        function drawConnections() {
+            for (let i = 0; i < locations.length; i++) {
+                for (let j = i + 1; j < locations.length; j++) {
+                    const loc1 = locations[i];
+                    const loc2 = locations[j];
+                    const distance = Math.sqrt(Math.pow(loc2.x - loc1.x, 2) + Math.pow(loc2.y - loc1.y, 2));
+                    
+                    // Only draw lines for very close locations
+                    if (distance < 150) {
+                        const line = document.createElement('div');
+                        line.className = 'connection-line';
+                        const angle = Math.atan2(loc2.y - loc1.y, loc2.x - loc1.x) * 180 / Math.PI;
+                        line.style.width = distance + 'px';
+                        line.style.left = (loc1.x + 12) + 'px';
+                        line.style.top = (loc1.y + 12) + 'px';
+                        line.style.transform = `rotate(${angle}deg)`;
+                        mapCanvas.appendChild(line);
+                    }
+                }
+            }
+        }
+
+        // Create location markers
+        function createLocations() {
+            locations.forEach((loc, index) => {
+                const locationDiv = document.createElement('div');
+                locationDiv.className = 'location';
+                locationDiv.style.left = loc.x + 'px';
+                locationDiv.style.top = loc.y + 'px';
+                
+                const iconDiv = document.createElement('div');
+                iconDiv.className = `location-icon ${loc.status}`;
+                iconDiv.textContent = loc.icon;
+
+                const label = document.createElement('div');
+                label.className = 'location-label';
+                label.textContent = loc.name;
+                
+                locationDiv.appendChild(iconDiv);
+                locationDiv.appendChild(label);
+                locationDiv.onclick = () => showInfo(loc);
+                
+                mapCanvas.appendChild(locationDiv);
+            });
+        }
+
+        function showInfo(location) {
+            const statusClass = location.status;
+            let statusText = 'MODERATE RISK';
+            if (statusClass === 'danger') statusText = 'HIGH RISK - EXTREME DANGER';
+            if (statusClass === 'safe') statusText = 'RELATIVELY SAFE';
+            if (statusClass === 'military') statusText = 'MILITARY ZONE';
+
+            panelContent.innerHTML = `
+                <h2>${location.icon} ${location.name}</h2>
+                <div class="status ${statusClass}">${statusText}</div>
+                <p>${location.description}</p>
+                <div class="resources">
+                    <h3>Available Resources & Intel</h3>
+                    <p>${location.resources}</p>
+                </div>
+            `;
+            
+            infoPanel.classList.add('active');
+        }
+
+        function closePanel() {
+            infoPanel.classList.remove('active');
+        }
+
+        // Initialize map
+        createWaterBodies();
+        createRoads();
+        createAreaLabels();
+        drawConnections();
+        createLocations();
+
+        // Close panel when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.location') && !e.target.closest('.info-panel')) {
+                closePanel();
+            }
+        });
+    </script>
+</body>
+</html>

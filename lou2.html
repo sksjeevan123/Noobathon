@@ -1,0 +1,1380 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE TURNING POINT - OUTBREAK ARCHIVE</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&amp;family=Courier+Prime:wght@400;700&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Courier Prime', monospace;
+      background: #0a0a0a;
+      color: #ff3333;
+      overflow: hidden;
+    }
+
+    .font-retro { font-family: 'VT323', monospace; letter-spacing: 2px; }
+    
+    /* CRT Scan Effects */
+    .crt-scanlines {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255, 0, 0, 0.03),
+        rgba(255, 0, 0, 0.03) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      z-index: 999;
+    }
+
+    .crt-flicker {
+      animation: flicker 0.15s infinite;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 0.98; }
+      50% { opacity: 1; }
+    }
+
+    /* Blood splatter background */
+    .blood-bg {
+      position: fixed;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse 800px 600px at 20% 30%, rgba(139, 0, 0, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse 600px 700px at 80% 70%, rgba(100, 0, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse 500px 500px at 50% 50%, rgba(80, 0, 0, 0.08) 0%, transparent 50%);
+      z-index: 0;
+    }
+
+    /* Biohazard Warning */
+    .biohazard-warning {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: radial-gradient(circle, #ff4444, #cc0000);
+      border: 3px solid #ff8800;
+      padding: 12px 16px;
+      border-radius: 50%;
+      font-weight: bold;
+      animation: warning-pulse 1s infinite;
+      z-index: 100;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 0 30px rgba(255, 0, 0, 0.8), inset 0 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    @keyframes warning-pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 0, 0, 0.8), inset 0 0 15px rgba(0, 0, 0, 0.5); }
+      50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(255, 0, 0, 1), inset 0 0 20px rgba(0, 0, 0, 0.7); }
+    }
+
+    /* Gore-stained text */
+    .gore-text {
+      text-shadow: 
+        2px 2px 0 rgba(139, 0, 0, 0.8),
+        4px 4px 0 rgba(80, 0, 0, 0.6),
+        6px 6px 8px rgba(0, 0, 0, 0.9);
+      color: #ff4444;
+    }
+
+    .blood-splatter-text {
+      position: relative;
+      display: inline-block;
+    }
+
+    .blood-splatter-text::before {
+      content: attr(data-splatter);
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      color: rgba(139, 0, 0, 0.5);
+      font-weight: bold;
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+    }
+
+    /* Infected overlay */
+    .infected-overlay {
+      animation: infected-glitch 0.3s infinite;
+    }
+
+    @keyframes infected-glitch {
+      0%, 100% { transform: translate(0, 0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(2px, -2px); }
+      60% { transform: translate(-1px, 1px); }
+      80% { transform: translate(1px, -1px); }
+    }
+
+    /* Biometric Decay */
+    .health-decay {
+      background: linear-gradient(90deg, 
+        #4caf50 0%, 
+        #ffeb3b 25%, 
+        #ff9800 50%, 
+        #ff3333 75%, 
+        #8b0000 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .health-decay::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.2) 2px,
+        rgba(0, 0, 0, 0.2) 4px
+      );
+      animation: decay-crawl 2s linear infinite;
+    }
+
+    @keyframes decay-crawl {
+      0% { transform: translateX(-10px); }
+      100% { transform: translateX(10px); }
+    }
+
+    /* Infection stages */
+    .stage-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      border: 3px solid;
+      position: relative;
+      overflow: hidden;
+      animation: stage-throb 1.5s infinite;
+    }
+
+    .stage-runner { 
+      border-color: #ffd700;
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.2), transparent);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5), inset 0 0 15px rgba(139, 0, 0, 0.3);
+    }
+
+    .stage-stalker { 
+      border-color: #ff9800;
+      background: radial-gradient(circle, rgba(255, 152, 0, 0.2), transparent);
+      box-shadow: 0 0 20px rgba(255, 152, 0, 0.5), inset 0 0 15px rgba(139, 0, 0, 0.3);
+    }
+
+    .stage-clicker { 
+      border-color: #ff5722;
+      background: radial-gradient(circle, rgba(255, 87, 34, 0.2), transparent);
+      box-shadow: 0 0 20px rgba(255, 87, 34, 0.5), inset 0 0 15px rgba(139, 0, 0, 0.4);
+    }
+
+    .stage-bloater { 
+      border-color: #8b0000;
+      background: radial-gradient(circle, rgba(139, 0, 0, 0.3), transparent);
+      box-shadow: 0 0 30px rgba(139, 0, 0, 0.8), inset 0 0 20px rgba(0, 0, 0, 0.6);
+    }
+
+    @keyframes stage-throb {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    /* Decayed panels */
+    .panel-gore {
+      background: linear-gradient(135deg, #1a0a0a 0%, #0d0505 100%);
+      border: 2px solid;
+      border-color: #8b2020;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-gore::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: 
+        repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(139, 0, 0, 0.1) 2px, rgba(139, 0, 0, 0.1) 4px),
+        repeating-linear-gradient(-45deg, transparent, transparent 2px, rgba(0, 0, 0, 0.15) 2px, rgba(0, 0, 0, 0.15) 4px);
+      pointer-events: none;
+    }
+
+    .panel-header-gore {
+      background: linear-gradient(90deg, rgba(139, 0, 0, 0.3) 0%, transparent 100%);
+      border-bottom: 2px solid #8b2020;
+      padding: 12px 16px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #ff6666;
+      font-family: 'VT323', monospace;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Infected pulsing */
+    .infected-pulse {
+      animation: infected-throb 0.8s ease-in-out infinite;
+    }
+
+    @keyframes infected-throb {
+      0%, 100% { 
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.4), inset 0 0 10px rgba(139, 0, 0, 0.2);
+      }
+      50% { 
+        box-shadow: 0 0 30px rgba(255, 51, 51, 0.8), inset 0 0 20px rgba(139, 0, 0, 0.5);
+      }
+    }
+
+    /* Buttons */
+    .btn-infected {
+      background: linear-gradient(135deg, #8b0000 0%, #4d0000 100%);
+      border: 2px solid #ff3333;
+      color: #ff9999;
+      padding: 12px 24px;
+      font-family: 'VT323', monospace;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+    }
+
+    .btn-infected:hover {
+      background: linear-gradient(135deg, #cc0000 0%, #8b0000 100%);
+      box-shadow: 0 0 25px rgba(255, 51, 51, 0.7), inset 0 0 15px rgba(139, 0, 0, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .btn-infected:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-faction {
+      background: linear-gradient(135deg, rgba(139, 0, 0, 0.2) 0%, rgba(80, 0, 0, 0.1) 100%);
+      border: 2px solid;
+      color: #ff6666;
+      padding: 16px 20px;
+      font-family: 'VT323', monospace;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-faction:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 20px rgba(255, 51, 51, 0.6);
+    }
+
+    .btn-faction.survivors { border-color: #7cb342; }
+    .btn-faction.fireflies { border-color: #ff9800; }
+    .btn-faction.fedra { border-color: #2196f3; }
+
+    /* Form inputs */
+    .input-infected {
+      background: #0a0a0a;
+      border: 2px solid #8b2020;
+      color: #ff3333;
+      padding: 12px 16px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 1rem;
+      width: 100%;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .input-infected:focus {
+      outline: none;
+      border-color: #ff3333;
+      box-shadow: 0 0 15px rgba(255, 51, 51, 0.5), inset 0 0 10px rgba(139, 0, 0, 0.2);
+      background: rgba(139, 0, 0, 0.05);
+    }
+
+    .input-infected::placeholder {
+      color: #663333;
+    }
+
+    .select-infected {
+      background: #0a0a0a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23ff3333' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E") no-repeat right 12px center;
+      background-size: 12px;
+      appearance: none;
+      padding-right: 36px;
+    }
+
+    /* Listen Mode */
+    .listen-toggle {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 500;
+    }
+
+    .listen-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1a0a0a 0%, #0d0505 100%);
+      border: 4px solid #ff3333;
+      color: #ff3333;
+      font-size: 2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(255, 51, 51, 0.5);
+    }
+
+    .listen-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 40px rgba(255, 51, 51, 0.8);
+    }
+
+    .listen-btn.active {
+      background: linear-gradient(135deg, #ff3333 0%, #cc0000 100%);
+      color: #0a0a0a;
+      box-shadow: 0 0 50px rgba(255, 51, 51, 1), inset 0 0 20px rgba(0, 0, 0, 0.5);
+      animation: listen-active 0.5s ease;
+    }
+
+    @keyframes listen-active {
+      0% { transform: scale(0.9); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    /* Listen mode effects */
+    .listen-mode-active {
+      filter: brightness(0.5) contrast(1.4) saturate(0.6);
+    }
+
+    .listen-mode-highlight {
+      animation: listen-danger-pulse 0.6s infinite !important;
+    }
+
+    @keyframes listen-danger-pulse {
+      0%, 100% { 
+        filter: drop-shadow(0 0 8px #ff3333) brightness(1.3);
+        transform: scale(1);
+      }
+      50% { 
+        filter: drop-shadow(0 0 20px #ff0000) brightness(1.6);
+        transform: scale(1.05);
+      }
+    }
+
+    /* Calibration */
+    .calibration-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      backdrop-filter: blur(10px);
+    }
+
+    .calibration-container {
+      background: linear-gradient(135deg, #1a0a0a 0%, #0d0505 100%);
+      border: 4px solid #ff3333;
+      border-radius: 8px;
+      padding: 32px;
+      max-width: 700px;
+      width: 90%;
+      box-shadow: 
+        0 0 50px rgba(139, 0, 0, 0.8),
+        inset 0 0 30px rgba(255, 0, 0, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .calibration-container::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(139, 0, 0, 0.08) 2px, rgba(139, 0, 0, 0.08) 4px);
+      pointer-events: none;
+    }
+
+    .calibration-title {
+      font-family: 'VT323', monospace;
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #ff4444;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Pattern grid */
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 32px 0;
+    }
+
+    .pattern-cell {
+      aspect-ratio: 1;
+      background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+      border: 3px solid #4caf50;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: bold;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pattern-cell:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+    }
+
+    .pattern-cell.active {
+      background: linear-gradient(135deg, #4caf50, #7cb342);
+      box-shadow: 0 0 25px rgba(76, 175, 80, 0.9), inset 0 0 15px rgba(255, 255, 255, 0.3);
+      border-color: #8bc34a;
+    }
+
+    .pattern-cell.correct {
+      animation: cell-correct 0.5s ease-out;
+    }
+
+    .pattern-cell.incorrect {
+      animation: cell-error 0.4s ease-out;
+    }
+
+    @keyframes cell-correct {
+      0% { background: #4caf50; transform: scale(1.1); }
+      100% { background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); transform: scale(1); }
+    }
+
+    @keyframes cell-error {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); background: #f44336; }
+      75% { transform: translateX(8px); background: #f44336; }
+    }
+
+    /* Slider */
+    .slider-track {
+      width: 100%;
+      height: 50px;
+      background: linear-gradient(90deg, #f44336, #ffeb3b, #4caf50);
+      border-radius: 25px;
+      position: relative;
+      border: 3px solid #2a2a2a;
+      cursor: pointer;
+      overflow: hidden;
+      margin: 32px 0;
+    }
+
+    .slider-target {
+      position: absolute;
+      width: 70px;
+      height: 50px;
+      background: rgba(76, 175, 80, 0.2);
+      border: 3px dashed #4caf50;
+      border-radius: 25px;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+    }
+
+    .slider-thumb {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle at 30% 30%, #fff, #8b0000);
+      border: 4px solid #ff3333;
+      border-radius: 50%;
+      top: 50%;
+      left: 0%;
+      transform: translate(-50%, -50%);
+      cursor: grab;
+      box-shadow: 0 0 20px rgba(139, 0, 0, 0.7);
+      transition: box-shadow 0.2s ease;
+      z-index: 10;
+    }
+
+    .slider-thumb:active {
+      cursor: grabbing;
+      box-shadow: 0 0 30px rgba(255, 51, 51, 0.9);
+    }
+
+    .slider-thumb.aligned {
+      background: radial-gradient(circle at 30% 30%, #fff, #4caf50);
+      border-color: #8bc34a;
+      box-shadow: 0 0 30px rgba(76, 175, 80, 0.9);
+    }
+
+    /* Map */
+    .map-container {
+      background: linear-gradient(180deg, #0d1a0d 0%, #0a0f0a 100%);
+      border: 3px solid #8b2020;
+      position: relative;
+      overflow: hidden;
+      height: 400px;
+    }
+
+    .map-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(139, 0, 0, 0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139, 0, 0, 0.2) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .zone-marker {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      border: 2px solid;
+    }
+
+    .zone-marker:hover {
+      transform: scale(1.4);
+      z-index: 100;
+    }
+
+    .marker-arcade {
+      background: radial-gradient(circle, #4caf50, #1b5e20);
+      border-color: #81c784;
+      box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+      animation: marker-pulse 1.5s infinite;
+    }
+
+    .marker-danger {
+      background: radial-gradient(circle, #ff0000, #8b0000);
+      border-color: #ff3333;
+      box-shadow: 0 0 25px rgba(255, 0, 0, 0.8);
+      animation: danger-pulse 0.7s infinite;
+    }
+
+    @keyframes marker-pulse {
+      0%, 100% { box-shadow: 0 0 15px rgba(76, 175, 80, 0.6); }
+      50% { box-shadow: 0 0 30px rgba(76, 175, 80, 0.9); }
+    }
+
+    @keyframes danger-pulse {
+      0%, 100% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.7); }
+      50% { box-shadow: 0 0 35px rgba(255, 0, 0, 1); }
+    }
+
+    /* Heatmap */
+    .heatmap-zone {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .heat-critical {
+      background: radial-gradient(circle, rgba(255, 0, 0, 0.8) 0%, transparent 70%);
+      box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+    }
+
+    .heat-high {
+      background: radial-gradient(circle, rgba(255, 51, 51, 0.6) 0%, transparent 70%);
+    }
+
+    .heat-medium {
+      background: radial-gradient(circle, rgba(255, 193, 7, 0.4) 0%, transparent 70%);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: #8b2020; border-radius: 5px; }
+    ::-webkit-scrollbar-thumb:hover { background: #ff3333; }
+
+    /* Content wrapper */
+    .content-wrapper {
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full overflow-auto crt-flicker">
+  <div class="crt-scanlines"></div>
+  <div class="blood-bg"></div>
+  <div class="biohazard-warning">
+   ⚠️
+  </div>
+  <div id="app" class="min-h-full w-full content-wrapper"><!-- LANDING PAGE -->
+   <div id="landing-page" class="min-h-full w-full">
+    <div class="py-16 px-4 text-center">
+     <div class="mb-8 pt-8">
+      <p class="text-sm tracking-widest text-red-500 mb-4 gore-text font-retro">▓▓▓ WARNING: BIOHAZARD DETECTED ▓▓▓</p>
+      <h1 id="terminal-title" class="font-retro text-6xl md:text-7xl font-black mb-4 gore-text" data-splatter="ERROR">THE TURNING POINT</h1>
+      <p id="terminal-msg" class="text-red-600 text-lg md:text-xl mt-4 tracking-wider font-retro">OUTBREAK IN PROGRESS — ACCESS RESTRICTED</p>
+     </div>
+     <div class="inline-block px-8 py-4 bg-red-950/40 border-4 border-red-700 mb-12 animated">
+      <p class="text-red-500 font-retro text-lg tracking-widest">INFECTION RATE: EXPONENTIAL</p>
+      <p class="text-red-600 font-retro text-sm mt-2">LAST UPDATE: 23:47 LOCAL TIME</p>
+     </div>
+     <div class="max-w-4xl mx-auto mb-12">
+      <h2 class="font-retro text-2xl md:text-3xl text-red-500 mb-6">CORDYCEPS INFECTION STAGES</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+       <div class="panel-gore p-6 rounded-lg text-center">
+        <div class="stage-icon stage-runner mb-4 mx-auto">
+         🏃
+        </div>
+        <h3 class="font-retro text-lg text-yellow-400 mb-2">RUNNER</h3>
+        <p class="text-red-600 text-xs leading-relaxed">Hours 1-2. Still appears human. Highly aggressive. Unstable CNS.</p>
+       </div>
+       <div class="panel-gore p-6 rounded-lg text-center">
+        <div class="stage-icon stage-stalker mb-4 mx-auto">
+         👁️
+        </div>
+        <h3 class="font-retro text-lg text-orange-400 mb-2">STALKER</h3>
+        <p class="text-red-600 text-xs leading-relaxed">Week 2-4. Fungal nodules emerging. Predatory tactics. Coordinated hunting.</p>
+       </div>
+       <div class="panel-gore p-6 rounded-lg text-center">
+        <div class="stage-icon stage-clicker mb-4 mx-auto">
+         🍄
+        </div>
+        <h3 class="font-retro text-lg text-orange-600 mb-2">CLICKER</h3>
+        <p class="text-red-600 text-xs leading-relaxed">Year 1+. Complete blindness. Echolocation. Hardened shell. EXTREME DANGER.</p>
+       </div>
+       <div class="panel-gore p-6 rounded-lg text-center">
+        <div class="stage-icon stage-bloater mb-4 mx-auto">
+         💀
+        </div>
+        <h3 class="font-retro text-lg text-red-700 mb-2">BLOATER</h3>
+        <p class="text-red-600 text-xs leading-relaxed">Years 10+. Massive fungal body. Spore delivery system. CANNOT BE KILLED.</p>
+       </div>
+      </div>
+     </div><!-- AUTH PANEL -->
+     <div class="max-w-2xl mx-auto panel-gore rounded-lg p-8">
+      <div class="panel-header-gore mb-6">
+       🔐 SECURE TERMINAL ACCESS
+      </div>
+      <form id="auth-form" class="space-y-6">
+       <div><label class="block text-red-500 text-sm mb-3 font-retro tracking-wider">OPERATIVE DESIGNATION</label> <input type="text" id="username" class="input-infected rounded" placeholder="ENTER CALLSIGN" required minlength="3" maxlength="30">
+       </div>
+       <div><label class="block text-red-500 text-sm mb-3 font-retro tracking-wider">FACTION ALLEGIANCE</label>
+        <div class="grid grid-cols-1 gap-3" id="faction-selector"><button type="button" class="btn-faction survivors rounded text-left flex items-center gap-4 p-4" data-faction="survivors"> <span class="text-3xl">🌿</span>
+          <div>
+           <div class="font-retro text-red-400 tracking-wider">
+            SURVIVORS
+           </div>
+           <div class="text-red-700 text-xs normal-case">
+            Independent units seeking refuge
+           </div>
+          </div></button> <button type="button" class="btn-faction fireflies rounded text-left flex items-center gap-4 p-4" data-faction="fireflies"> <span class="text-3xl">🔥</span>
+          <div>
+           <div class="font-retro text-orange-400 tracking-wider">
+            FIREFLIES
+           </div>
+           <div class="text-orange-700 text-xs normal-case">
+            Militant rebels pursuing cure
+           </div>
+          </div></button> <button type="button" class="btn-faction fedra rounded text-left flex items-center gap-4 p-4" data-faction="fedra"> <span class="text-3xl">🛡️</span>
+          <div>
+           <div class="font-retro text-blue-400 tracking-wider">
+            FEDRA COMMAND
+           </div>
+           <div class="text-blue-700 text-xs normal-case">
+            Federal quarantine enforcement
+           </div>
+          </div></button>
+        </div><input type="hidden" id="selected-faction" required>
+       </div>
+       <div><label class="block text-red-500 text-sm mb-3 font-retro tracking-wider">CURRENT SECTOR</label> <select id="location" class="input-infected select-infected rounded" required> <option value="">SELECT SECTOR...</option> <option value="sector-1">Sector 1 - Downtown Quarantine</option> <option value="sector-2">Sector 2 - Harbor District</option> <option value="sector-3">Sector 3 - Industrial Zone</option> <option value="sector-4">Sector 4 - Residential North</option> <option value="sector-5">Sector 5 - University Campus</option> <option value="sector-6">Sector 6 - Old Town</option> <option value="sector-7">Sector 7 - Outskirts</option> </select>
+       </div><button type="submit" id="auth-submit" class="btn-infected w-full rounded" disabled> <span id="auth-btn-text">SELECT FACTION TO CONTINUE</span> </button>
+      </form>
+      <div id="auth-error" class="hidden mt-4 p-4 bg-red-950/60 border-2 border-red-700 rounded text-red-400 text-sm text-center font-retro">
+       ERROR
+      </div>
+     </div>
+    </div>
+   </div><!-- COMMAND CENTER -->
+   <div id="command-center" class="hidden min-h-full w-full p-4 md:p-6"><!-- Header -->
+    <div class="panel-gore mb-6 rounded-lg p-4">
+     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+       <div id="faction-badge" class="w-14 h-14 rounded-lg flex items-center justify-center text-3xl border-2"></div>
+       <div>
+        <h1 class="font-retro text-xl text-red-500" id="user-callsign">OPERATIVE</h1>
+        <p class="text-red-700 text-sm font-retro" id="user-faction">FACTION</p>
+       </div>
+      </div>
+      <div class="text-right">
+       <p class="text-red-700 text-xs font-retro">CURRENT POSITION</p>
+       <p class="font-retro text-red-400" id="user-location">SECTOR</p>
+      </div><button id="logout-btn" class="px-6 py-2 bg-red-950 border-2 border-red-700 rounded text-red-400 hover:bg-red-900 transition-all text-sm font-retro"> DISCONNECT </button>
+     </div>
+    </div><!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><!-- Left Column -->
+     <div class="space-y-6"><!-- Biometrics -->
+      <div class="panel-gore rounded-lg overflow-hidden">
+       <div class="panel-header-gore">
+        ❤️ BIOMETRIC SCAN
+       </div>
+       <div class="p-4 space-y-4">
+        <div>
+         <div class="flex justify-between text-sm mb-2"><span class="text-red-600">HEALTH STATUS</span> <span class="text-red-400 font-retro" id="health-pct">85%</span>
+         </div>
+         <div class="w-full h-6 bg-black/50 border-2 border-red-700 rounded overflow-hidden">
+          <div class="h-full health-decay" id="health-bar" style="width: 85%;"></div>
+         </div>
+        </div>
+        <div>
+         <div class="flex justify-between text-sm mb-2"><span class="text-red-600">INFECTION STATUS</span> <span class="text-red-400 font-retro" id="infection-status">UNINFECTED</span>
+         </div>
+         <div class="w-full h-4 bg-black/50 border border-red-700 rounded flex gap-1 p-1" id="infection-bar">
+          <div class="flex-1 bg-green-600/80 border border-green-400"></div>
+          <div class="flex-1 bg-green-600/80 border border-green-400"></div>
+          <div class="flex-1 bg-yellow-600/40 border border-yellow-400/40"></div>
+          <div class="flex-1 bg-yellow-600/40 border border-yellow-400/40"></div>
+          <div class="flex-1 bg-red-900/40 border border-red-600/40"></div>
+         </div>
+        </div>
+       </div>
+      </div><!-- Inventory -->
+      <div class="panel-gore rounded-lg overflow-hidden">
+       <div class="panel-header-gore">
+        🎒 INVENTORY
+       </div>
+       <div class="p-4 space-y-2">
+        <div class="flex justify-between items-center p-2 bg-black/30 rounded border border-red-900/50"><span class="text-red-500 text-sm">Medkits</span> <span class="font-retro text-red-400" id="inv-medkits">0</span>
+        </div>
+        <div class="flex justify-between items-center p-2 bg-black/30 rounded border border-red-900/50"><span class="text-red-500 text-sm">Ammunition</span> <span class="font-retro text-red-400" id="inv-ammo">0</span>
+        </div>
+        <div class="flex justify-between items-center p-2 bg-black/30 rounded border border-red-900/50"><span class="text-red-500 text-sm">Rags</span> <span class="font-retro text-red-400" id="inv-rags">0</span>
+        </div>
+        <div class="flex justify-between items-center p-2 bg-black/30 rounded border border-red-900/50"><span class="text-red-500 text-sm">Alcohol</span> <span class="font-retro text-red-400" id="inv-alcohol">0</span>
+        </div>
+        <div class="flex justify-between items-center p-2 bg-black/30 rounded border border-red-900/50"><span class="text-red-500 text-sm">Collectibles</span> <span class="font-retro text-yellow-500" id="inv-cards">0</span>
+        </div>
+       </div>
+      </div>
+     </div><!-- Center Column -->
+     <div class="lg:col-span-2 space-y-6"><!-- Objective -->
+      <div class="panel-gore rounded-lg overflow-hidden">
+       <div class="panel-header-gore" id="objective-header">
+        🎯 MISSION DIRECTIVE
+       </div>
+       <div class="p-4">
+        <p class="text-red-500 text-sm leading-relaxed" id="objective-text">Loading...</p>
+       </div>
+      </div><!-- Map -->
+      <div class="panel-gore rounded-lg overflow-hidden">
+       <div class="panel-header-gore">
+        🗺️ TACTICAL MAP - LIVE THREAT ASSESSMENT
+       </div>
+       <div class="map-container" id="tactical-map">
+        <div class="map-grid"></div>
+        <div id="heatmap-layer"></div>
+        <div id="markers-layer"></div>
+       </div>
+      </div><!-- Stats -->
+      <div class="panel-gore rounded-lg overflow-hidden">
+       <div class="panel-header-gore">
+        📊 ZONE ANALYSIS
+       </div>
+       <div class="p-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+         <div class="bg-black/40 p-3 rounded border border-red-900/50">
+          <div class="text-red-700 text-xs font-retro">
+           SURVIVORS
+          </div>
+          <div class="text-red-400 font-retro text-lg" id="stat-survivors">
+           0
+          </div>
+         </div>
+         <div class="bg-black/40 p-3 rounded border border-red-900/50">
+          <div class="text-orange-700 text-xs font-retro">
+           FIREFLIES
+          </div>
+          <div class="text-orange-400 font-retro text-lg" id="stat-fireflies">
+           0
+          </div>
+         </div>
+         <div class="bg-black/40 p-3 rounded border border-red-900/50">
+          <div class="text-blue-700 text-xs font-retro">
+           FEDRA
+          </div>
+          <div class="text-blue-400 font-retro text-lg" id="stat-fedra">
+           0
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- CALIBRATION OVERLAY -->
+  <div id="calibration-overlay" class="calibration-backdrop hidden">
+   <div class="calibration-container">
+    <div class="calibration-title">
+     ⚙️ ARCADE CALIBRATION
+    </div><!-- Stage 1: Travel Verification -->
+    <div id="cal-stage-1" class="mb-6">
+     <p class="text-red-500 text-sm mb-4 font-retro">THE HANDSHAKE: Verify travel route integrity</p>
+     <div class="space-y-4">
+      <div><label class="block text-red-500 text-sm mb-2 font-retro">LAST POSITION</label> <select id="cal-prev-loc" class="input-infected select-infected rounded w-full"> <option value="">SELECT...</option> <option value="sector-1">Sector 1 - Downtown Quarantine</option> <option value="sector-2">Sector 2 - Harbor District</option> <option value="sector-3">Sector 3 - Industrial Zone</option> <option value="sector-4">Sector 4 - Residential North</option> <option value="sector-5">Sector 5 - University Campus</option> <option value="sector-6">Sector 6 - Old Town</option> <option value="sector-7">Sector 7 - Outskirts</option> </select>
+      </div>
+      <div><label class="block text-red-500 text-sm mb-2 font-retro">CURRENT POSITION</label> <select id="cal-curr-loc" class="input-infected select-infected rounded w-full"> <option value="">SELECT...</option> <option value="sector-1">Sector 1 - Downtown Quarantine</option> <option value="sector-2">Sector 2 - Harbor District</option> <option value="sector-3">Sector 3 - Industrial Zone</option> <option value="sector-4">Sector 4 - Residential North</option> <option value="sector-5">Sector 5 - University Campus</option> <option value="sector-6">Sector 6 - Old Town</option> <option value="sector-7">Sector 7 - Outskirts</option> </select>
+      </div><button id="cal-travel-btn" class="btn-infected w-full rounded" disabled> CONFIRM ROUTE </button>
+     </div>
+    </div><!-- Stage 2: Pattern Minigame -->
+    <div id="cal-stage-2" class="hidden mb-6">
+     <p class="text-red-500 text-sm mb-2 font-retro">THE HACK: Match the sequence</p>
+     <p class="text-red-700 text-xs mb-6 font-retro">Watch pattern then repeat by clicking...</p>
+     <div class="pattern-grid" id="pattern-grid">
+      <div class="pattern-cell" data-idx="0">
+       1
+      </div>
+      <div class="pattern-cell" data-idx="1">
+       2
+      </div>
+      <div class="pattern-cell" data-idx="2">
+       3
+      </div>
+      <div class="pattern-cell" data-idx="3">
+       4
+      </div>
+      <div class="pattern-cell" data-idx="4">
+       5
+      </div>
+      <div class="pattern-cell" data-idx="5">
+       6
+      </div>
+      <div class="pattern-cell" data-idx="6">
+       7
+      </div>
+      <div class="pattern-cell" data-idx="7">
+       8
+      </div>
+      <div class="pattern-cell" data-idx="8">
+       9
+      </div>
+     </div>
+     <p class="text-center text-red-500 text-sm mb-4 font-retro" id="pattern-status">Ready...</p><button id="cal-pattern-start" class="btn-infected w-full rounded"> START SEQUENCE </button>
+    </div><!-- Stage 3: Slider Calibration -->
+    <div id="cal-stage-3" class="hidden">
+     <p class="text-red-500 text-sm mb-2 font-retro">THE CALIBRATION: Align frequency</p>
+     <p class="text-red-700 text-xs mb-6 font-retro">Drag slider into green zone...</p>
+     <div class="slider-track" id="slider-track">
+      <div class="slider-target"></div>
+      <div class="slider-thumb" id="slider-thumb"></div>
+     </div>
+     <p class="text-center text-red-500 text-sm mb-4 font-retro" id="slider-status">Align to target...</p><button id="cal-slider-confirm" class="btn-infected w-full rounded" disabled> CALIBRATION COMPLETE </button>
+    </div>
+   </div>
+  </div><!-- LISTEN MODE TOGGLE -->
+  <div class="listen-toggle hidden" id="listen-toggle"><button class="listen-btn" id="listen-btn" title="Listen Mode">👂</button>
+  </div>
+  <script>
+    // ===== CONFIG =====
+    const defaultConfig = {
+      terminal_title: 'THE OUTBREAK ARCHIVE',
+      welcome_message: 'WARNING: OUTBREAK IN PROGRESS — ACCESS RESTRICTED'
+    };
+
+    let currentUser = null;
+    let allUsers = [];
+
+    // Map data
+    const mapData = {
+      arcades: [
+        { id: 'a1', x: 25, y: 30, name: 'Downtown Terminal' },
+        { id: 'a2', x: 70, y: 65, name: 'Harbor Access' },
+        { id: 'a3', x: 45, y: 80, name: 'Industrial Hub' },
+        { id: 'a4', x: 80, y: 20, name: 'North Station' },
+        { id: 'a5', x: 15, y: 60, name: 'Campus Node' },
+        { id: 'a6', x: 55, y: 45, name: 'Old Town Point' },
+        { id: 'a7', x: 90, y: 85, name: 'Outskirts Relay' }
+      ],
+      dangers: [
+        { id: 'd1', x: 40, y: 50, level: 'critical' },
+        { id: 'd2', x: 60, y: 70, level: 'critical' },
+        { id: 'd3', x: 30, y: 75, level: 'high' },
+        { id: 'd4', x: 85, y: 50, level: 'critical' },
+        { id: 'd5', x: 50, y: 25, level: 'high' }
+      ],
+      heatmap: [
+        { x: 38, y: 48, size: 120, level: 'critical' },
+        { x: 58, y: 68, size: 100, level: 'critical' },
+        { x: 28, y: 73, size: 80, level: 'high' },
+        { x: 83, y: 48, size: 90, level: 'critical' },
+        { x: 50, y: 30, size: 60, level: 'high' }
+      ]
+    };
+
+    const objectives = {
+      survivors: '🌿 SURVIVOR OBJECTIVE: Locate nearest Arcade Point for supplies and shelter. Avoid infected zones. Trust no one.',
+      fireflies: '🔥 FIREFLY OBJECTIVE: Connect with rebel zones and secure supply routes. Coordinate liberation efforts.',
+      fedra: '🛡️ FEDRA OBJECTIVE: Patrol designated checkpoints. Maintain quarantine integrity. Report all anomalies.'
+    };
+
+    // ===== ELEMENT SDK =====
+    async function initElementSdk() {
+      if (window.elementSdk) {
+        await window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            const title = document.getElementById('terminal-title');
+            const msg = document.getElementById('terminal-msg');
+            if (title) {
+              title.textContent = config.terminal_title || defaultConfig.terminal_title;
+              title.setAttribute('data-splatter', config.terminal_title || defaultConfig.terminal_title);
+            }
+            if (msg) {
+              msg.textContent = config.welcome_message || defaultConfig.welcome_message;
+            }
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ['terminal_title', config.terminal_title || defaultConfig.terminal_title],
+            ['welcome_message', config.welcome_message || defaultConfig.welcome_message]
+          ])
+        });
+      }
+    }
+
+    // ===== DATA SDK =====
+    const dataHandler = {
+      onDataChanged(data) {
+        allUsers = data;
+        if (currentUser && currentUser.__backendId) {
+          const updated = data.find(u => u.__backendId === currentUser.__backendId);
+          if (updated) {
+            currentUser = updated;
+            updateCommandCenter();
+          }
+        }
+      }
+    };
+
+    async function initDataSdk() {
+      if (window.dataSdk) {
+        await window.dataSdk.init(dataHandler);
+      }
+    }
+
+    // ===== AUTH =====
+    function setupAuth() {
+      const form = document.getElementById('auth-form');
+      const factionBtns = document.querySelectorAll('[data-faction]');
+      const selectedInput = document.getElementById('selected-faction');
+      const submitBtn = document.getElementById('auth-submit');
+      const btnText = document.getElementById('auth-btn-text');
+
+      factionBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          factionBtns.forEach(b => {
+            b.style.borderColor = '';
+            b.style.boxShadow = '';
+          });
+          const faction = btn.dataset.faction;
+          selectedInput.value = faction;
+          btn.style.borderColor = '#ff3333';
+          btn.style.boxShadow = '0 0 20px rgba(255, 51, 51, 0.6)';
+          submitBtn.disabled = false;
+          btnText.textContent = 'AUTHENTICATE';
+        });
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value.trim();
+        const faction = selectedInput.value;
+        const location = document.getElementById('location').value;
+
+        if (!username || !faction || !location) {
+          showAuthError('All fields required');
+          return;
+        }
+
+        submitBtn.disabled = true;
+        btnText.textContent = 'AUTHENTICATING...';
+
+        try {
+          const newUser = {
+            id: Date.now().toString(),
+            username: username.toUpperCase(),
+            faction,
+            location,
+            health: Math.floor(Math.random() * 30) + 65,
+            infection_stage: 'None',
+            medkits: Math.floor(Math.random() * 5) + 1,
+            ammo: Math.floor(Math.random() * 30) + 10,
+            rags: Math.floor(Math.random() * 8) + 2,
+            alcohol: Math.floor(Math.random() * 5) + 1,
+            trading_cards: Math.floor(Math.random() * 10) + 1,
+            created_at: new Date().toISOString(),
+            calibrated: false
+          };
+
+          if (window.dataSdk) {
+            const result = await window.dataSdk.create(newUser);
+            if (!result.isOk) {
+              showAuthError('Authentication failed');
+              submitBtn.disabled = false;
+              btnText.textContent = 'AUTHENTICATE';
+              return;
+            }
+            await new Promise(r => setTimeout(r, 500));
+            const saved = allUsers.find(u => u.id === newUser.id);
+            currentUser = saved || newUser;
+          } else {
+            currentUser = newUser;
+          }
+
+          enterCommandCenter();
+        } catch (err) {
+          console.error(err);
+          showAuthError('Error');
+          submitBtn.disabled = false;
+          btnText.textContent = 'AUTHENTICATE';
+        }
+      });
+    }
+
+    function showAuthError(msg) {
+      const err = document.getElementById('auth-error');
+      err.textContent = '✗ ERROR: ' + msg;
+      err.classList.remove('hidden');
+      setTimeout(() => err.classList.add('hidden'), 4000);
+    }
+
+    function enterCommandCenter() {
+      document.getElementById('landing-page').classList.add('hidden');
+      document.getElementById('command-center').classList.remove('hidden');
+      updateCommandCenter();
+      renderMap();
+      document.getElementById('listen-toggle').classList.remove('hidden');
+      document.getElementById('listen-btn').addEventListener('click', toggleListenMode);
+
+      setTimeout(() => {
+        if (!currentUser.calibrated) {
+          showCalibration();
+        }
+      }, 600);
+
+      document.getElementById('logout-btn').addEventListener('click', logout);
+    }
+
+    function updateCommandCenter() {
+      if (!currentUser) return;
+
+      document.getElementById('user-callsign').textContent = currentUser.username;
+      document.getElementById('user-faction').textContent = currentUser.faction.toUpperCase();
+      document.getElementById('user-location').textContent = currentUser.location.replace('-', ' ').toUpperCase();
+
+      const badge = document.getElementById('faction-badge');
+      const icons = { survivors: '🌿', fireflies: '🔥', fedra: '🛡️' };
+      const colors = { survivors: '#7cb342', fireflies: '#ff9800', fedra: '#2196f3' };
+      badge.textContent = icons[currentUser.faction];
+      badge.style.borderColor = colors[currentUser.faction];
+      badge.style.background = colors[currentUser.faction] + '33';
+
+      const health = currentUser.health || 75;
+      document.getElementById('health-pct').textContent = health + '%';
+      document.getElementById('health-bar').style.width = health + '%';
+
+      document.getElementById('infection-status').textContent = currentUser.infection_stage || 'UNINFECTED';
+
+      document.getElementById('inv-medkits').textContent = currentUser.medkits || 0;
+      document.getElementById('inv-ammo').textContent = currentUser.ammo || 0;
+      document.getElementById('inv-rags').textContent = currentUser.rags || 0;
+      document.getElementById('inv-alcohol').textContent = currentUser.alcohol || 0;
+      document.getElementById('inv-cards').textContent = currentUser.trading_cards || 0;
+
+      document.getElementById('objective-header').textContent = '🎯 ' + currentUser.faction.toUpperCase() + ' DIRECTIVE';
+      document.getElementById('objective-text').textContent = objectives[currentUser.faction];
+
+      const factionCounts = { survivors: 0, fireflies: 0, fedra: 0 };
+      allUsers.forEach(u => factionCounts[u.faction]++);
+      document.getElementById('stat-survivors').textContent = factionCounts.survivors;
+      document.getElementById('stat-fireflies').textContent = factionCounts.fireflies;
+      document.getElementById('stat-fedra').textContent = factionCounts.fedra;
+    }
+
+    // ===== MAP =====
+    function renderMap() {
+      const heatmap = document.getElementById('heatmap-layer');
+      const markers = document.getElementById('markers-layer');
+      heatmap.innerHTML = '';
+      markers.innerHTML = '';
+
+      mapData.heatmap.forEach(zone => {
+        const el = document.createElement('div');
+        el.className = `heatmap-zone heat-${zone.level}`;
+        el.style.left = zone.x + '%';
+        el.style.top = zone.y + '%';
+        el.style.width = zone.size + 'px';
+        el.style.height = zone.size + 'px';
+        el.style.transform = 'translate(-50%, -50%)';
+        heatmap.appendChild(el);
+      });
+
+      mapData.arcades.forEach(point => {
+        const m = document.createElement('div');
+        m.className = 'zone-marker marker-arcade';
+        m.style.left = point.x + '%';
+        m.style.top = point.y + '%';
+        m.style.transform = 'translate(-50%, -50%)';
+        m.innerHTML = '📡';
+        m.title = point.name;
+        markers.appendChild(m);
+      });
+
+      mapData.dangers.forEach(zone => {
+        const m = document.createElement('div');
+        m.className = 'zone-marker marker-danger';
+        m.style.left = zone.x + '%';
+        m.style.top = zone.y + '%';
+        m.style.transform = 'translate(-50%, -50%)';
+        m.innerHTML = '☠️';
+        markers.appendChild(m);
+      });
+    }
+
+    // ===== CALIBRATION =====
+    class Calibration {
+      constructor() {
+        this.stage = 1;
+        this.sequence = [];
+        this.userSeq = [];
+        this.playing = false;
+        this.sliderTarget = 0;
+      }
+
+      startTravelStage() {
+        document.getElementById('cal-stage-1').classList.remove('hidden');
+        document.getElementById('cal-stage-2').classList.add('hidden');
+        document.getElementById('cal-stage-3').classList.add('hidden');
+        this.stage = 1;
+      }
+
+      confirmTravel() {
+        document.getElementById('cal-stage-1').classList.add('hidden');
+        document.getElementById('cal-stage-2').classList.remove('hidden');
+        this.stage = 2;
+        this.genSequence();
+      }
+
+      genSequence() {
+        this.sequence = [];
+        const len = 4 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < len; i++) {
+          this.sequence.push(Math.floor(Math.random() * 9));
+        }
+        this.userSeq = [];
+      }
+
+      async playSeq() {
+        this.playing = true;
+        const cells = document.querySelectorAll('.pattern-cell');
+        for (const idx of this.sequence) {
+          await new Promise(r => setTimeout(r, 600));
+          cells[idx].classList.add('active');
+          await new Promise(r => setTimeout(r, 300));
+          cells[idx].classList.remove('active');
+        }
+        this.playing = false;
+        document.getElementById('pattern-status').textContent = `Match: ${this.userSeq.length}/${this.sequence.length}`;
+      }
+
+      recordClick(idx) {
+        if (this.playing) return;
+        this.userSeq.push(idx);
+        const cells = document.querySelectorAll('.pattern-cell');
+        cells[idx].classList.add('active');
+        setTimeout(() => cells[idx].classList.remove('active'), 200);
+
+        if (this.userSeq[this.userSeq.length - 1] === this.sequence[this.userSeq.length - 1]) {
+          cells[idx].classList.add('correct');
+          if (this.userSeq.length === this.sequence.length) {
+            document.getElementById('pattern-status').textContent = '✓ PATTERN MATCHED';
+            setTimeout(() => this.moveToSlider(), 800);
+          } else {
+            document.getElementById('pattern-status').textContent = `Match: ${this.userSeq.length}/${this.sequence.length}`;
+          }
+        } else {
+          cells[idx].classList.add('incorrect');
+          document.getElementById('pattern-status').textContent = '✗ INCORRECT - RESTART';
+          setTimeout(() => {
+            this.userSeq = [];
+            document.getElementById('pattern-status').textContent = `Match: 0/${this.sequence.length}`;
+          }, 700);
+        }
+      }
+
+      moveToSlider() {
+        document.getElementById('cal-stage-2').classList.add('hidden');
+        document.getElementById('cal-stage-3').classList.remove('hidden');
+        this.stage = 3;
+        this.sliderTarget = 40 + Math.random() * 20;
+      }
+
+      updateSlider(pct) {
+        const thumb = document.getElementById('slider-thumb');
+        thumb.style.left = pct + '%';
+
+        if (Math.abs(pct - this.sliderTarget) < 10) {
+          thumb.classList.add('aligned');
+          document.getElementById('cal-slider-confirm').disabled = false;
+          document.getElementById('slider-status').textContent = '✓ ALIGNED';
+        } else {
+          thumb.classList.remove('aligned');
+          document.getElementById('cal-slider-confirm').disabled = true;
+          const off = Math.abs(pct - this.sliderTarget);
+          const dir = pct > this.sliderTarget ? 'LEFT' : 'RIGHT';
+          document.getElementById('slider-status').textContent = `${dir} ${off.toFixed(0)}%`;
+        }
+      }
+    }
+
+    const cal = new Calibration();
+
+    function showCalibration() {
+      document.getElementById('calibration-overlay').classList.remove('hidden');
+      cal.startTravelStage();
+
+      document.getElementById('cal-travel-btn').onclick = () => {
+        const prev = document.getElementById('cal-prev-loc').value;
+        const curr = document.getElementById('cal-curr-loc').value;
+        if (prev && curr) {
+          cal.confirmTravel();
+          setTimeout(() => cal.playSeq(), 300);
+        }
+      };
+
+      document.querySelectorAll('.pattern-cell').forEach(cell => {
+        cell.onclick = () => cal.recordClick(parseInt(cell.dataset.idx));
+      });
+
+      document.getElementById('cal-pattern-start').onclick = () => cal.playSeq();
+
+      const track = document.getElementById('slider-track');
+      const thumb = document.getElementById('slider-thumb');
+      let dragging = false;
+
+      thumb.addEventListener('mousedown', () => dragging = true);
+      document.addEventListener('mouseup', () => dragging = false);
+      document.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+        const rect = track.getBoundingClientRect();
+        const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+        cal.updateSlider(pct);
+      });
+
+      document.getElementById('cal-slider-confirm').onclick = () => {
+        document.getElementById('calibration-overlay').classList.add('hidden');
+        if (currentUser && currentUser.__backendId && window.dataSdk) {
+          window.dataSdk.update({...currentUser, calibrated: true});
+        }
+      };
+
+      const prevLoc = document.getElementById('cal-prev-loc');
+      const currLoc = document.getElementById('cal-curr-loc');
+      const travelBtn = document.getElementById('cal-travel-btn');
+      [prevLoc, currLoc].forEach(s => {
+        s.addEventListener('change', () => {
+          travelBtn.disabled = !prevLoc.value || !currLoc.value;
+        });
+      });
+    }
+
+    // ===== LISTEN MODE =====
+    let listenModeActive = false;
+
+    function toggleListenMode() {
+      listenModeActive = !listenModeActive;
+      const btn = document.getElementById('listen-btn');
+      const cc = document.getElementById('command-center');
+
+      if (listenModeActive) {
+        btn.classList.add('active');
+        cc.classList.add('listen-mode-active');
+        document.querySelectorAll('.marker-danger').forEach(m => {
+          m.classList.add('listen-mode-highlight');
+        });
+      } else {
+        btn.classList.remove('active');
+        cc.classList.remove('listen-mode-active');
+        document.querySelectorAll('.marker-danger').forEach(m => {
+          m.classList.remove('listen-mode-highlight');
+        });
+      }
+    }
+
+    function logout() {
+      currentUser = null;
+      listenModeActive = false;
+      document.getElementById('listen-toggle').classList.add('hidden');
+      document.getElementById('command-center').classList.add('hidden');
+      document.getElementById('landing-page').classList.remove('hidden');
+      document.getElementById('auth-form').reset();
+      document.getElementById('selected-faction').value = '';
+      document.getElementById('auth-submit').disabled = true;
+      document.getElementById('auth-btn-text').textContent = 'SELECT FACTION TO CONTINUE';
+      document.querySelectorAll('[data-faction]').forEach(b => {
+        b.style.borderColor = '';
+        b.style.boxShadow = '';
+      });
+    }
+
+    // ===== INIT =====
+    async function init() {
+      await initElementSdk();
+      await initDataSdk();
+      setupAuth();
+    }
+
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d15426747478cf1',t:'MTc3MTY2NjU4Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
