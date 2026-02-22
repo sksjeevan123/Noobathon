@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Survivor Map — Safe Route Finder</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --survivor-primary: #d4a843;
+      --survivor-dark: #1a1005;
+      --survivor-border: #8b6914;
+    }
+
+    body {
+      font-family: 'Crimson Text', serif;
+      background: #050000;
+      color: #c8a96e;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* ══════════ MAIN MAP UI ══════════ */
+    #mapUI {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* HEADER */
+    .header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 22px 16px;
+      border-bottom: 3px solid var(--survivor-border);
+      background: linear-gradient(180deg, rgba(14, 9, 2, 1) 0%, rgba(20, 13, 3, 0.95) 60%, rgba(26, 16, 4, 0.85) 100%);
+      box-shadow: 0 6px 35px rgba(139, 105, 20, 0.8), 0 2px 10px rgba(0, 0, 0, 1);
+      z-index: 100;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .faction-badge {
+      font-size: 26px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--survivor-border);
+      color: var(--survivor-primary);
+      box-shadow: 0 0 15px rgba(212, 168, 67, 0.5);
+    }
+
+    .map-title {
+      font-family: 'Cinzel', serif;
+      font-weight: 900;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: var(--survivor-primary);
+      text-shadow: 0 0 20px rgba(212, 168, 67, 0.5);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .coordinates {
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      opacity: 0.6;
+    }
+
+    /* header drip */
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 0;
+      right: 0;
+      height: 20px;
+      pointer-events: none;
+      z-index: 101;
+      background: radial-gradient(ellipse 7px 22px at 3% 0%, var(--survivor-border) 85%, transparent 100%), radial-gradient(ellipse 5px 15px at 8% 0%, var(--survivor-primary) 85%, transparent 100%), radial-gradient(ellipse 9px 20px at 15% 0%, var(--survivor-border) 85%, transparent 100%), radial-gradient(ellipse 6px 18px at 22% 0%, var(--survivor-primary) 85%, transparent 100%), radial-gradient(ellipse 8px 13px at 30% 0%, var(--survivor-border) 85%, transparent 100%), radial-gradient(ellipse 5px 20px at 38% 0%, var(--survivor-primary) 85%, transparent 100%), radial-gradient(ellipse 10px 16px at 47% 0%, var(--survivor-border) 85%, transparent 100%), radial-gradient(ellipse 6px 21px at 55% 0%, var(--survivor-primary) 85%, transparent 100%), radial-gradient(ellipse 8px 14px at 63% 0%, var(--survivor-border) 85%, transparent 100%), radial-gradient(ellipse 5px 19px at 71% 0%, var(--survivor-primary) 85%, transparent 100%), radial-gradient(ellipse 9px 22px at 79% 0%, var(--survivor-border) 85%, transparent 100%), radial-gradient(ellipse 6px 15px at 86% 0%, var(--survivor-primary) 85%, transparent 100%), radial-gradient(ellipse 7px 18px at 92% 0%, var(--survivor-border) 85%, transparent 100%), radial-gradient(ellipse 8px 14px at 97% 0%, var(--survivor-primary) 85%, transparent 100%);
+      animation: bloodDrip 3.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes bloodDrip {
+      0% {
+        transform: scaleY(1);
+      }
+
+      100% {
+        transform: scaleY(1.4);
+      }
+    }
+
+    /* LEGEND */
+    .legend-bar {
+      position: absolute;
+      top: 55px;
+      left: 0;
+      right: 0;
+      padding: 7px 22px;
+      border-bottom: 1px solid var(--survivor-border);
+      background: rgba(18, 12, 2, 0.98);
+      color: rgba(212, 168, 67, 0.6);
+      z-index: 99;
+      display: flex;
+      gap: 18px;
+      font-size: 10px;
+      flex-wrap: wrap;
+      font-family: 'Courier Prime', monospace;
+      letter-spacing: 0.5px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      opacity: 0.8;
+    }
+
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+    }
+
+    /* MAP */
+    .map-container {
+      position: absolute;
+      top: 87px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: auto;
+      background: #030000;
+    }
+
+    .map-canvas {
+      position: relative;
+      width: 3200px;
+      height: 2200px;
+      background-image: url(map.jpeg);
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+    }
+
+    .grid-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+      background-image: linear-gradient(rgba(139, 105, 20, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(139, 105, 20, 0.07) 1px, transparent 1px);
+      background-size: 100px 100px;
+    }
+
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(212, 168, 67, 0.35) 30%, rgba(212, 168, 67, 0.35) 50%, rgba(212, 168, 67, 0.35) 70%, transparent);
+      animation: scanMove 9s linear infinite;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    @keyframes scanMove {
+      0% {
+        top: 0;
+      }
+
+      100% {
+        top: 100%;
+      }
+    }
+
+    /* FOG OF WAR */
+    .fog-patch {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 8;
+      background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.35) 50%, transparent 70%);
+    }
+
+    /* Infected zones */
+    .infected-zone {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    .infected-zone::before,
+    .infected-zone::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 2px solid rgba(180, 0, 0, 0.55);
+    }
+
+    .infected-zone::before {
+      width: 100%;
+      height: 100%;
+      animation: bp 2.5s ease-out infinite;
+    }
+
+    .infected-zone::after {
+      width: 75%;
+      height: 75%;
+      animation: bp 2.5s ease-out infinite 0.9s;
+    }
+
+    @keyframes bp {
+      0% {
+        transform: translate(-50%, -50%) scale(0.7);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(-50%, -50%) scale(2.1);
+        opacity: 0;
+      }
+    }
+
+    .zone-major {
+      background: radial-gradient(ellipse at center, rgba(130, 0, 0, 0.35) 0%, transparent 70%);
+    }
+
+    .zone-nyc {
+      left: 2440px;
+      top: 470px;
+      width: 150px;
+      height: 130px;
+    }
+
+    .zone-la {
+      left: 310px;
+      top: 1040px;
+      width: 180px;
+      height: 150px;
+    }
+
+    .zone-atlanta {
+      left: 2040px;
+      top: 940px;
+      width: 120px;
+      height: 100px;
+    }
+
+    .zone-seattle {
+      left: 305px;
+      top: 430px;
+      width: 100px;
+      height: 90px;
+    }
+
+    .zone-nola {
+      left: 1760px;
+      top: 1330px;
+      width: 120px;
+      height: 100px;
+    }
+
+    /* LOCATION MARKERS */
+    .location {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 60;
+    }
+
+    .location:hover {
+      transform: scale(1.7);
+      z-index: 100;
+    }
+
+    .loc-pulse {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      animation: lp 1.9s ease-out infinite;
+    }
+
+    @keyframes lp {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.9;
+      }
+
+      100% {
+        transform: translate(-50%, -50%) scale(2.9);
+        opacity: 0;
+      }
+    }
+
+    .loc-icon {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      border: 2px solid;
+    }
+
+    /* status colours */
+    .loc-icon.safe {
+      background: linear-gradient(135deg, rgba(0, 70, 20, 0.92), rgba(0, 50, 12, 0.97));
+      border-color: #00cc33;
+      box-shadow: 0 0 14px rgba(0, 180, 50, 0.6);
+    }
+
+    .loc-icon.safe .loc-pulse {
+      background: rgba(0, 200, 50, 0.35);
+    }
+
+    .loc-icon.danger {
+      background: linear-gradient(135deg, rgba(140, 0, 0, 0.92), rgba(90, 0, 0, 0.97));
+      border-color: #ff2222;
+      box-shadow: 0 0 14px rgba(255, 0, 0, 0.7);
+    }
+
+    .loc-icon.danger .loc-pulse {
+      background: rgba(255, 0, 0, 0.4);
+    }
+
+    .loc-icon.arcade {
+      background: linear-gradient(135deg, rgba(160, 120, 0, 0.92), rgba(120, 85, 0, 0.97));
+      border-color: #ffcc00;
+      box-shadow: 0 0 18px rgba(255, 200, 0, 0.9);
+      animation: arcadeGlow 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes arcadeGlow {
+      0% {
+        box-shadow: 0 0 18px rgba(255, 200, 0, 0.9), 0 0 35px rgba(255, 160, 0, 0.4);
+      }
+
+      100% {
+        box-shadow: 0 0 28px rgba(255, 220, 0, 1), 0 0 55px rgba(255, 180, 0, 0.7);
+      }
+    }
+
+    .loc-icon.arcade .loc-pulse {
+      background: rgba(255, 200, 0, 0.5);
+    }
+
+    .loc-label {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      white-space: nowrap;
+      text-shadow: 1px 1px 3px #000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-bottom: 2px solid;
+      color: #ffcc55;
+      background: rgba(15, 10, 2, 0.95);
+      border-bottom-color: var(--survivor-border);
+    }
+
+    .location:hover .loc-label {
+      opacity: 1;
+      top: -34px;
+    }
+
+    /* CONNECTION LINES */
+    .connection-line {
+      position: absolute;
+      height: 1px;
+      transform-origin: left center;
+      pointer-events: none;
+      z-index: 25;
+      background: linear-gradient(90deg, transparent, rgba(139, 105, 20, 0.4) 20%, rgba(139, 105, 20, 0.4) 80%, transparent);
+      animation: vp 2.2s ease-in-out infinite;
+    }
+
+    @keyframes vp {
+
+      0%,
+      100% {
+        opacity: 0.3;
+      }
+
+      50% {
+        opacity: 0.7;
+      }
+    }
+
+    /* INFO PANEL */
+    .info-panel {
+      position: fixed;
+      right: -440px;
+      top: 87px;
+      width: 420px;
+      border: 1px solid #6b4a10;
+      border-right: none;
+      border-radius: 8px 0 0 8px;
+      padding: 22px;
+      max-height: calc(100vh - 107px);
+      overflow-y: auto;
+      transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 90;
+      font-family: 'Crimson Text', serif;
+      background: linear-gradient(180deg, rgba(14, 9, 2, 0.99), rgba(10, 6, 1, 0.98));
+      box-shadow: -5px 0 45px rgba(212, 168, 67, 0.3), -2px 0 15px rgba(0, 0, 0, 1);
+    }
+
+    .info-panel.active {
+      right: 0;
+    }
+
+    .info-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(180deg, var(--survivor-primary), var(--survivor-border), var(--survivor-primary));
+      box-shadow: 0 0 12px rgba(212, 168, 67, 0.7);
+      animation: sideGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes sideGlow {
+      0% {
+        opacity: 0.6;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .info-panel h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 16px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      border-bottom: 2px solid;
+      padding-bottom: 8px;
+      letter-spacing: 3px;
+    }
+
+    .info-panel .status-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: 1px solid;
+      font-family: 'Cinzel', serif;
+      animation: stBlink 2s ease-in-out infinite;
+    }
+
+    @keyframes stBlink {
+
+      0%,
+      100% {
+        box-shadow: 0 0 5px currentColor;
+      }
+
+      50% {
+        box-shadow: 0 0 18px currentColor;
+      }
+    }
+
+    .info-panel p {
+      line-height: 1.7;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+
+    .info-panel .resources-box {
+      padding: 12px;
+      border-left: 3px solid;
+      border-radius: 0 6px 6px 0;
+      margin-top: 12px;
+    }
+
+    .info-panel .resources-box h3 {
+      font-size: 10px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: 'Cinzel', serif;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 26px;
+      height: 26px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 24px;
+      text-align: center;
+      border: 1px solid var(--survivor-border);
+      color: var(--survivor-primary);
+      transition: all 0.3s;
+      background: transparent;
+    }
+
+    /* scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(5, 0, 0, 0.5);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      border-radius: 3px;
+    }
+
+    /* particles */
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 45;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      animation: pf 12s linear infinite;
+      background: rgba(212, 168, 67, 0.4);
+    }
+
+    @keyframes pf {
+      0% {
+        transform: translateY(2200px) scale(1);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.6;
+      }
+
+      90% {
+        opacity: 0.3;
+      }
+
+      100% {
+        transform: translateY(-100px) translateX(-30px) scale(0.2);
+        opacity: 0;
+      }
+    }
+
+    /* skull decals */
+    .skull-deco {
+      position: absolute;
+      font-size: 40px;
+      opacity: 0.05;
+      pointer-events: none;
+      z-index: 3;
+      animation: sd 7s ease-in-out infinite;
+    }
+
+    @keyframes sd {
+
+      0%,
+      100% {
+        opacity: 0.03;
+      }
+
+      50% {
+        opacity: 0.07;
+      }
+    }
+
+    /* COMPASS */
+    .compass {
+      position: fixed;
+      bottom: 25px;
+      left: 25px;
+      width: 72px;
+      height: 72px;
+      border: 2px solid rgba(139, 105, 20, 0.65);
+      border-radius: 50%;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(14, 9, 2, 0.93);
+      box-shadow: 0 0 22px rgba(212, 168, 67, 0.3), inset 0 0 15px rgba(139, 105, 20, 0.3);
+    }
+
+    .compass-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .compass-n,
+    .compass-s,
+    .compass-e,
+    .compass-w {
+      position: absolute;
+      font-size: 11px;
+      font-family: 'Cinzel', serif;
+      font-weight: bold;
+    }
+
+    .compass-n {
+      top: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #ff2222;
+      text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
+    }
+
+    .compass-s {
+      bottom: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #7a5a20;
+    }
+
+    .compass-e {
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #7a5a20;
+    }
+
+    .compass-w {
+      left: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #7a5a20;
+    }
+
+    .compass-needle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 3px;
+      height: 28px;
+      background: linear-gradient(180deg, #ff0000 50%, #555 50%);
+      transform: translate(-50%, -50%);
+      border-radius: 2px;
+    }
+
+    /* BOTTOM BAR */
+    .bottom-bar {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .info-chip {
+      background: rgba(18, 12, 2, 0.98);
+      border-color: var(--survivor-border);
+      color: var(--survivor-primary);
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: 'Courier Prime', monospace;
+      letter-spacing: 1px;
+      border: 1px solid;
+    }
+
+    /* LOADING */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #020000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      z-index: 9998;
+      transition: opacity 0.6s ease;
+    }
+
+    .loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-text {
+      font-family: 'Cinzel', serif;
+      font-size: 18px;
+      letter-spacing: 6px;
+      color: var(--survivor-primary);
+      text-shadow: 0 0 20px rgba(212, 168, 67, 0.8);
+      animation: lb 1s ease-in-out infinite;
+    }
+
+    .loading-bar {
+      width: 260px;
+      height: 3px;
+      border-radius: 2px;
+      overflow: hidden;
+      border: 1px solid rgba(139, 105, 20, 0.4);
+    }
+
+    .loading-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--survivor-border), var(--survivor-primary), var(--survivor-border));
+      animation: lf 1.8s ease-in-out infinite;
+    }
+
+    @keyframes lb {
+
+      0%,
+      100% {
+        opacity: 0.4;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes lf {
+      0% {
+        width: 0%;
+      }
+
+      100% {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-text" id="loadingText">🎯 LOCATING NEAREST ARCADE POINT...</div>
+    <div class="loading-bar">
+      <div class="loading-fill"></div>
+    </div>
+  </div>
+
+  <div id="mapUI">
+    <div class="header" id="mapHeader">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="faction-badge" id="factionBadge">🧍</div>
+          <div>
+            <div class="map-title" id="mapTitle">☠ SURVIVOR MAP — SAFE ROUTE FINDER ☠</div>
+            <div id="mapSubtitle"
+              style="font-family:'Courier Prime',monospace;font-size:10px;opacity:0.5;letter-spacing:2px;margin-top:2px;color:var(--survivor-border);">
+              // CIVILIAN INTEL — FACTION BASES HIDDEN //</div>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="coordinates">LAT 40.71°N | LON 74.00°W | Y20PO</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend-bar" id="legendBar">
+      <div class="legend-item">
+        <div class="legend-dot" style="background:rgba(0,180,50,0.9);box-shadow:0 0 8px rgba(0,180,50,0.9);"></div>
+        <span>SAFE SETTLEMENT</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:rgba(255,200,0,0.9);box-shadow:0 0 8px rgba(255,200,0,0.9);"></div>
+        <span>SAFE ARCADE POINT ⚡</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:rgba(255,0,0,0.9);box-shadow:0 0 8px rgba(255,0,0,0.9);"></div>
+        <span>DANGER — INFECTED/HOSTILE</span>
+      </div>
+    </div>
+    <div style="position: fixed; bottom: 30px; left: 30px; z-index: 1000;">
+      <button onclick="returnToCommandCenter()" class="btn-infected px-8 py-4 text-xl flex items-center gap-3"
+        style="background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);">
+        ← BACK
+      </button>
+    </div>
+    <div class="map-container">
+      <div class="map-canvas" id="mapCanvas">
+        <div class="skull-deco" style="left:480px;top:780px;">💀</div>
+        <div class="skull-deco" style="left:1380px;top:490px;">💀</div>
+        <div class="skull-deco" style="left:2180px;top:980px;">💀</div>
+        <div class="skull-deco" style="left:790px;top:1180px;">💀</div>
+        <div class="skull-deco" style="left:2580px;top:580px;">💀</div>
+        <div class="skull-deco" style="left:1700px;top:1300px;">💀</div>
+        <div class="grid-overlay" id="gridOverlay"></div>
+        <div class="scan-line" id="scanLine"></div>
+        <div class="infected-zone zone-major zone-nyc"></div>
+        <div class="infected-zone zone-major zone-la"></div>
+        <div class="infected-zone zone-major zone-atlanta"></div>
+        <div class="infected-zone zone-major zone-seattle"></div>
+        <div class="infected-zone zone-major zone-nola"></div>
+        <div class="particles" id="particles"></div>
+      </div>
+    </div>
+
+    <div class="info-panel" id="infoPanel">
+      <button class="close-btn" id="closePanelBtn" onclick="closePanel()">×</button>
+      <div id="panelContent">
+        <h2>Select Location</h2>
+        <p>Click any marker on the map to view intel.</p>
+      </div>
+    </div>
+
+    <div class="compass" id="compass">
+      <div class="compass-inner">
+        <div class="compass-n">N</div>
+        <div class="compass-s">S</div>
+        <div class="compass-e">E</div>
+        <div class="compass-w">W</div>
+        <div class="compass-needle"></div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="info-chip" id="timeChip">00:00:00 UTC</div>
+      <div class="info-chip" id="nodeChip">NODES: 0</div>
+    </div>
+  </div>
+
+  <script>
+    const SHARED = [{ "name": "Fargo Farmstead", "x": 1280, "y": 420, "icon": "🌾", "status": "safe", "desc": "Vast grain belt farmstead. Provides food to settlements across the plains.", "res": "Food: Grain | Pop: ~450" }, { "name": "Green Bay Outpost", "x": 1680, "y": 520, "icon": "🏘️", "status": "safe", "desc": "Walled farming community. Cheese production gives strong trade value.", "res": "Food: Dairy | Pop: ~210" }, { "name": "Des Moines Silos", "x": 1530, "y": 750, "icon": "🌽", "status": "safe", "desc": "Iowa grain silos. Most food-secure inland location.", "res": "Food: Massive Stores | Pop: ~350" }, { "name": "Salem Outpost", "x": 2670, "y": 370, "icon": "🏘️", "status": "safe", "desc": "Coastal survivor settlement. Active fishing trade.", "res": "Food: Fish | Pop: ~200" }, { "name": "Burlington Commune", "x": 2550, "y": 320, "icon": "🌻", "status": "safe", "desc": "Vermont farming commune. Pacifist. Maple syrup trade.", "res": "Food: Maple | Pop: ~160" }, { "name": "Jackson County", "x": 870, "y": 700, "icon": "🏔️", "status": "safe", "desc": "Mountain community. Best settlement in the region.", "res": "Food: Agriculture | Pop: 300" }, { "name": "Eugene Community", "x": 340, "y": 670, "icon": "🏘️", "status": "safe", "desc": "Peaceful settlement. Education and art focus.", "res": "Education | Peaceful | Pop: ~180" }, { "name": "Crater Lake", "x": 400, "y": 750, "icon": "🌊", "status": "safe", "desc": "Pristine mountain lake. Crystal clear water.", "res": "Fresh Water | Fishing" }, { "name": "Yosemite Valley", "x": 420, "y": 1000, "icon": "⛰️", "status": "safe", "desc": "Untouched national park. Eco-community established.", "res": "Hunting | Pop: ~60" }, { "name": "Missoula Valley", "x": 750, "y": 460, "icon": "🌲", "status": "safe", "desc": "Mountain valley. University library intact.", "res": "Library | Pop: ~200" }, { "name": "Boise Farmlands", "x": 650, "y": 620, "icon": "🌱", "status": "safe", "desc": "Fertile Idaho valley. Snake River irrigation.", "res": "Food: Abundant | Pop: ~320" }, { "name": "Asheville Outpost", "x": 2170, "y": 970, "icon": "🏔️", "status": "safe", "desc": "Mountain town. Brewery operational.", "res": "Alcohol | Pop: ~180" }, { "name": "Nashville Soundstage", "x": 1820, "y": 1050, "icon": "🎸", "status": "safe", "desc": "Music city survivors keep culture alive.", "res": "Morale: High | Pop: ~220" }, { "name": "Austin Community", "x": 1170, "y": 1450, "icon": "🎓", "status": "safe", "desc": "University town. Knowledge preservation.", "res": "Education | Pop: ~500" }, { "name": "Santa Fe Pueblo", "x": 970, "y": 1250, "icon": "🏺", "status": "safe", "desc": "Native American community. Traditional survival.", "res": "Culture | Pop: ~120" }, { "name": "Charlotte Settlement", "x": 2220, "y": 1000, "icon": "🏘️", "status": "safe", "desc": "Walled community with solar power.", "res": "Power: Solar | Pop: 400+" }, { "name": "Blue Ridge Camp", "x": 2320, "y": 900, "icon": "⛺", "status": "safe", "desc": "Mountain survivor community. Self-sufficient.", "res": "Food: Agriculture | Pop: ~250" }, { "name": "Carlsbad Caverns", "x": 1000, "y": 1350, "icon": "🕳️", "status": "safe", "desc": "Largest underground settlement. Entirely hidden.", "res": "Underground | Pop: ~600" }, { "name": "San Antonio Mission", "x": 1120, "y": 1470, "icon": "⛪", "status": "safe", "desc": "Mission sanctuary. Medical care.", "res": "Medical | Pop: ~200" }, { "name": "Bar Harbor Island", "x": 2750, "y": 270, "icon": "🏝️", "status": "safe", "desc": "Island — zero infected. Boat access only.", "res": "Fish | Pop: ~90 | Zero Infected" }, { "name": "Virginia Beach Camp", "x": 2560, "y": 960, "icon": "🏖️", "status": "safe", "desc": "Coastal community. Low spore count.", "res": "Food: Ocean Fish | Pop: ~220" }, { "name": "Great Falls Station", "x": 900, "y": 400, "icon": "💧", "status": "safe", "desc": "Hydroelectric. Reliable electricity.", "res": "Power: Hydro | Pop: ~140" }, { "name": "Thunder Bay Camp", "x": 1680, "y": 280, "icon": "🌲", "status": "safe", "desc": "Lake Superior lakeside camp.", "res": "Fish | Lumber | Pop: ~130" }, { "name": "Quebec City Walls", "x": 2500, "y": 310, "icon": "🏰", "status": "safe", "desc": "Ancient stone fortifications. Survivor stronghold.", "res": "Defense | Pop: ~380" }, { "name": "Palm Springs Oasis", "x": 460, "y": 1200, "icon": "🌴", "status": "safe", "desc": "Desert geothermal spring. Hidden gem.", "res": "Water | Pop: ~80" }, { "name": "Flagstaff Heights", "x": 730, "y": 1100, "icon": "🏔️", "status": "safe", "desc": "High altitude pine forest. Infected sparse.", "res": "Lumber | Pop: ~75" }, { "name": "Grand Junction Camp", "x": 810, "y": 870, "icon": "🏕️", "status": "safe", "desc": "Colorado River valley. Fruit orchards.", "res": "Food | Pop: ~130" }, { "name": "Rapid City Caverns", "x": 1080, "y": 600, "icon": "🕳️", "status": "safe", "desc": "Underground cave community.", "res": "Shelter | Pop: ~170" }, { "name": "Louisville Distillery", "x": 1770, "y": 930, "icon": "🥃", "status": "safe", "desc": "Bourbon distillery settlement.", "res": "Alcohol | Pop: ~120" }, { "name": "Roanoke Colony", "x": 2350, "y": 1000, "icon": "🏘️", "status": "safe", "desc": "Isolated mountain town. Independent.", "res": "Independent | Pop: ~200" }, { "name": "NYC Ruins", "x": 2520, "y": 650, "icon": "💀", "status": "danger", "desc": "Complete urban decay. Infected off the charts.", "res": "Extreme Infected | Avoid" }, { "name": "Pittsburgh QZ", "x": 2220, "y": 750, "icon": "💀", "status": "danger", "desc": "Failed quarantine. Hunter gangs.", "res": "Hostiles | No Safe Zones" }, { "name": "Atlanta Ruins", "x": 2020, "y": 1150, "icon": "💀", "status": "danger", "desc": "Southern metropolis fallen. CDC lost.", "res": "Disease Risk | Fire Damage" }, { "name": "Los Angeles Wasteland", "x": 320, "y": 1150, "icon": "💀", "status": "danger", "desc": "Sprawling ruins. Gang territories.", "res": "Gang Territories | High Risk" }, { "name": "Las Vegas Ruins", "x": 570, "y": 1050, "icon": "💀", "status": "danger", "desc": "Desert city. Raider haven.", "res": "Raiders | Desert Hazard" }, { "name": "Washington DC Ruins", "x": 2420, "y": 850, "icon": "💀", "status": "danger", "desc": "Capital wasteland. Heavy infected.", "res": "Heavy Infected" }, { "name": "New Orleans Ruins", "x": 1780, "y": 1350, "icon": "💀", "status": "danger", "desc": "Flooded city. Aquatic infected.", "res": "Flooded | Infected: Aquatic" }, { "name": "Houston Refinery", "x": 1270, "y": 1500, "icon": "💀", "status": "danger", "desc": "Oil fires. Toxic air.", "res": "Fuel | Toxic Air" }, { "name": "Detroit Ruins", "x": 1880, "y": 650, "icon": "💀", "status": "danger", "desc": "Dense infected streets.", "res": "Infected: Dense" }, { "name": "Kansas City Ruins", "x": 1450, "y": 900, "icon": "💀", "status": "danger", "desc": "Crossroads infected convergence.", "res": "Infected: Converging" }, { "name": "Yellowstone Caldera", "x": 950, "y": 580, "icon": "💀", "status": "danger", "desc": "Unstable geothermal. Heat-drawn infected.", "res": "Unstable Ground | Heat" }, { "name": "Seattle Downtown", "x": 320, "y": 450, "icon": "💀", "status": "danger", "desc": "WLF vs Seraphite active war zone.", "res": "WLF | Combat Zone" }, { "name": "Philadelphia Ruins", "x": 2460, "y": 700, "icon": "💀", "status": "danger", "desc": "Very dense infected population.", "res": "Infected: Very Dense" }, { "name": "Miami Beach Ruins", "x": 2120, "y": 1450, "icon": "💀", "status": "danger", "desc": "Hurricane damage. Flooding.", "res": "Hurricane Risk | Flooding" }, { "name": "Minneapolis Crater", "x": 1500, "y": 560, "icon": "💀", "status": "danger", "desc": "Military bombing crater. Radiation.", "res": "Radiation | Destroyed" }, { "name": "St Louis Arch", "x": 1650, "y": 870, "icon": "💀", "status": "danger", "desc": "Mass infected gathering under arch.", "res": "Mass Infected | Avoid" }];
+
+    const ARCADE = [{ "name": "SAFE POINT — Jackson", "x": 870, "y": 690, "icon": "🎯", "status": "arcade", "desc": "NEAREST SAFE ARCADE POINT. Jackson County — full supplies, shelter, welcoming community. Signal: Two fires at dusk.", "res": "⚡ NEAREST | Supplies: Full | Signal: Two Fires" }, { "name": "SAFE POINT — Blue Ridge", "x": 2310, "y": 890, "icon": "🎯", "status": "arcade", "desc": "SAFE ARCADE POINT. Blue Ridge mountain cache. Medical + food. Old ranger station.", "res": "Medical: Stocked | Food: 2 Weeks | Hidden" }, { "name": "SAFE POINT — Austin", "x": 1160, "y": 1440, "icon": "🎯", "status": "arcade", "desc": "SAFE ARCADE POINT. University vault. Knowledge and supply cache. Open to survivors.", "res": "Knowledge | Supplies | Open" }, { "name": "SAFE POINT — Eugene", "x": 330, "y": 660, "icon": "🎯", "status": "arcade", "desc": "SAFE ARCADE POINT. Eugene safehouse network. Underground access. Signal: 3 knocks.", "res": "Tunnel | Signal: 3 Knocks" }, { "name": "SAFE POINT — Carlsbad", "x": 990, "y": 1340, "icon": "🎯", "status": "arcade", "desc": "SAFE ARCADE POINT. Carlsbad deep shelter. 6 months food stockpile.", "res": "6-Month Food | 600+ Capacity" }, { "name": "SAFE POINT — Vermont", "x": 2540, "y": 310, "icon": "🎯", "status": "arcade", "desc": "SAFE ARCADE POINT. Vermont commune. Peaceful. Maple farm shelter.", "res": "Food | Community: Open" }, { "name": "SAFE POINT — Yosemite", "x": 410, "y": 990, "icon": "🎯", "status": "arcade", "desc": "SAFE ARCADE POINT. Yosemite nature camp. Hunting and clean water.", "res": "Hunting | Clean Water" }, { "name": "SAFE POINT — Thunder Bay", "x": 1670, "y": 270, "icon": "🎯", "status": "arcade", "desc": "SAFE ARCADE POINT. Winter-proof shelters. Fish supply.", "res": "Winter Shelter | Fish" }, { "name": "SAFE POINT — Boise", "x": 640, "y": 610, "icon": "🎯", "status": "arcade", "desc": "SAFE ARCADE POINT. Boise farmlands — full food stock, welcoming community.", "res": "Food: Abundant | Shelter | Community" }];
+
+    const statusTexts = { safe: '✓ SAFE SETTLEMENT', arcade: '⚡ SAFE ARCADE POINT — NEAREST', danger: '☠ DANGER ZONE — AVOID' };
+    const statusStyles = {
+      safe: 'background:rgba(0,60,15,0.5);color:#44dd66;border-color:#009933;',
+      arcade: 'background:rgba(120,90,0,0.5);color:#ffcc33;border-color:#cc9900;',
+      danger: 'background:rgba(90,0,0,0.5);color:#ff4444;border-color:#cc0000;'
+    };
+
+    function initSurvivorMap() {
+      const mc = document.getElementById('mapCanvas');
+      const locs = [...SHARED, ...ARCADE];
+
+      // Spawn particles
+      const pc = document.getElementById('particles');
+      for (let i = 0; i < 50; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const s = 1.5 + Math.random() * 3.5;
+        p.style.cssText = `width:${s}px;height:${s}px;left:${Math.random() * 100}%;animation-delay:${Math.random() * 12}s;animation-duration:${9 + Math.random() * 7}s;opacity:${0.2 + Math.random() * 0.4};`;
+        pc.appendChild(p);
+      }
+
+      // Fog patches
+      const fogAreas = [
+        { x: 2550, y: 400, w: 200, h: 180 },
+        { x: 800, y: 840, w: 180, h: 160 },
+        { x: 1200, y: 1330, w: 180, h: 160 },
+        { x: 1740, y: 540, w: 160, h: 130 },
+      ];
+      fogAreas.forEach(fa => {
+        const fog = document.createElement('div');
+        fog.className = 'fog-patch';
+        fog.style.cssText = `left:${fa.x}px;top:${fa.y}px;width:${fa.w}px;height:${fa.h}px;`;
+        const label = document.createElement('div');
+        label.style.cssText = `position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Courier Prime',monospace;font-size:9px;color:rgba(139,105,20,0.6);letter-spacing:2px;white-space:nowrap;`;
+        label.textContent = '[ HIDDEN ]';
+        fog.appendChild(label);
+        mc.appendChild(fog);
+      });
+
+      // Draw connections
+      locs.forEach((a, i) => {
+        locs.slice(i + 1).forEach(b => {
+          const d = Math.hypot(b.x - a.x, b.y - a.y);
+          if (d < 155 && a.status !== 'danger' && b.status !== 'danger') {
+            const ln = document.createElement('div');
+            ln.className = 'connection-line';
+            const ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+            ln.style.cssText = `width:${d}px;left:${a.x + 16}px;top:${a.y + 16}px;transform:rotate(${ang}deg);`;
+            mc.appendChild(ln);
+          }
+        });
+      });
+
+      // Create markers
+      locs.forEach(loc => {
+        const w = document.createElement('div');
+        w.className = 'location';
+        w.style.cssText = `left:${loc.x}px;top:${loc.y}px;`;
+        const pu = document.createElement('div');
+        pu.className = 'loc-pulse';
+        const ic = document.createElement('div');
+        ic.className = `loc-icon ${loc.status}`;
+        ic.textContent = loc.icon;
+        ic.appendChild(pu);
+        const lb2 = document.createElement('div');
+        lb2.className = 'loc-label';
+        lb2.textContent = loc.name;
+        w.appendChild(ic);
+        w.appendChild(lb2);
+        w.onclick = () => showInfo(loc);
+        mc.appendChild(w);
+      });
+
+      document.getElementById('nodeChip').textContent = `NODES: ${locs.length} ACTIVE`;
+
+      // Hide loading after a bit
+      setTimeout(() => {
+        const lo = document.getElementById('loadingOverlay');
+        lo.style.opacity = '0';
+        lo.style.pointerEvents = 'none';
+      }, 1800);
+    }
+
+    function showInfo(loc) {
+      const statusText = statusTexts[loc.status] || statusTexts.safe;
+      const statusStyle = statusStyles[loc.status] || statusStyles.safe;
+      const h2Color = loc.status === 'danger' ? '#cc2200' : loc.status === 'arcade' ? '#ffcc00' : '#d4a843';
+      const resColor = loc.status === 'arcade' ? '#cc9900' : '#6b4a10';
+
+      document.getElementById('panelContent').innerHTML = `
+    <h2 style="color:${h2Color}; border-bottom-color:#6b4a10;">${loc.icon} ${loc.name}</h2>
+    <div class="status-badge" style="${statusStyle}">${statusText}</div>
+    <p style="color:rgba(212,168,67,0.8);">${loc.desc}</p>
+    <div class="resources-box" style="background:rgba(0,0,0,0.4);border-left-color:${resColor};">
+      <h3 style="color:${h2Color};">📡 INTEL & RESOURCES</h3>
+      <p style="color:rgba(212,168,67,0.8);font-family:'Courier Prime',monospace;font-size:12px;">${loc.res}</p>
+    </div>`;
+      document.getElementById('infoPanel').classList.add('active');
+    }
+
+    function closePanel() { document.getElementById('infoPanel').classList.remove('active'); }
+
+    function updateTime() {
+      document.getElementById('timeChip').textContent = new Date().toISOString().substr(11, 8) + ' UTC';
+    }
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.location') && !e.target.closest('.info-panel')) closePanel();
+    });
+
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    // Initialize the map as soon as the DOM is ready
+    document.addEventListener('DOMContentLoaded', initSurvivorMap);
+    function returnToCommandCenter() {
+      // Set flag to indicate we're returning
+      localStorage.setItem('returnToCommandCenter', 'true');
+      // Go back to main page
+      window.location.href = '/';
+    }
+
+  </script>
+</body>
+
+</html>

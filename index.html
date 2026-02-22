@@ -1,0 +1,2660 @@
+<!doctype html>
+<html lang="en" class="h-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE TURNING POINT - OUTBREAK ARCHIVE</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&amp;family=Courier+Prime:wght@400;700&amp;display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Courier Prime', monospace;
+      background: #0a0a0a;
+      color: #ff3333;
+      overflow: hidden;
+    }
+
+    .font-retro {
+      font-family: 'VT323', monospace;
+      letter-spacing: 2px;
+    }
+
+    /* Login Page Styles */
+    .crt-overlay {
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15) 1px, transparent 1px, transparent 2px);
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .auth-container {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .form-wrapper {
+      position: relative;
+      width: 90%;
+      max-width: 500px;
+      background: linear-gradient(145deg, #141a14 0%, #0a0f0a 100%);
+      border: 3px solid #8b2020;
+      border-radius: 16px;
+      padding: 48px;
+      box-shadow: 0 0 60px rgba(139, 32, 32, 0.5), inset 0 0 30px rgba(255, 0, 0, 0.1), 0 0 100px rgba(139, 32, 32, 0.3);
+      animation: form-slide 0.6s ease-out;
+    }
+
+    @keyframes form-slide {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .form-title {
+      font-family: 'VT323', monospace;
+      font-size: 2rem;
+      font-weight: 900;
+      color: #ff4444;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.9rem;
+      color: #4caf50;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      background: linear-gradient(145deg, #0d150d, #1a1f1a);
+      border: 2px solid #2a3a2a;
+      border-radius: 8px;
+      color: #d4e6d4;
+      font-family: 'VT323', monospace;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #4caf50;
+      box-shadow: 0 0 15px rgba(76, 175, 80, 0.5), inset 0 0 10px rgba(76, 175, 80, 0.1);
+      background: linear-gradient(145deg, #0d150d, #1a2a1a);
+    }
+
+    .form-input::placeholder {
+      color: #666;
+    }
+
+    .form-group select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234caf50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      background-size: 16px;
+      padding-right: 48px;
+    }
+
+    .error-message {
+      color: #ff6666;
+      font-size: 0.85rem;
+      margin-top: 6px;
+      display: none;
+      animation: shake 0.3s ease-out;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-5px);
+      }
+
+      75% {
+        transform: translateX(5px);
+      }
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      margin-top: 20px;
+      background: linear-gradient(145deg, #4caf50 0%, #3d8b40 100%);
+      border: 2px solid #8bc34a;
+      color: #000;
+      font-family: 'VT323', monospace;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      background: linear-gradient(145deg, #8bc34a 0%, #4caf50 100%);
+      box-shadow: 0 0 30px rgba(76, 175, 80, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .form-toggle {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .form-toggle a {
+      color: #4caf50;
+      cursor: pointer;
+      text-decoration: underline;
+      transition: color 0.2s ease;
+    }
+
+    .form-toggle a:hover {
+      color: #8bc34a;
+    }
+
+    .success-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(145deg, #1a3a1a, #0d2a0d);
+      border: 3px solid #4caf50;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      z-index: 2000;
+      display: none;
+      box-shadow: 0 0 40px rgba(76, 175, 80, 0.6);
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    .success-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+
+    .success-text {
+      color: #4caf50;
+      font-family: 'VT323', monospace;
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    /* CRT Scan Effects */
+    .crt-scanlines {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg,
+          rgba(255, 0, 0, 0.03),
+          rgba(255, 0, 0, 0.03) 1px,
+          transparent 1px,
+          transparent 2px);
+      z-index: 999;
+    }
+
+    .crt-flicker {
+      animation: flicker 0.15s infinite;
+    }
+
+    @keyframes flicker {
+
+      0%,
+      100% {
+        opacity: 0.98;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    /* Blood splatter background */
+    .blood-bg {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 800px 600px at 20% 30%, rgba(139, 0, 0, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse 600px 700px at 80% 70%, rgba(100, 0, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse 500px 500px at 50% 50%, rgba(80, 0, 0, 0.08) 0%, transparent 50%);
+      z-index: 0;
+    }
+
+    /* Biohazard Warning */
+    .biohazard-warning {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: radial-gradient(circle, #ff4444, #cc0000);
+      border: 3px solid #ff8800;
+      padding: 12px 16px;
+      border-radius: 50%;
+      font-weight: bold;
+      animation: warning-pulse 1s infinite;
+      z-index: 100;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 0 30px rgba(255, 0, 0, 0.8), inset 0 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    @keyframes warning-pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 30px rgba(255, 0, 0, 0.8), inset 0 0 15px rgba(0, 0, 0, 0.5);
+      }
+
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 50px rgba(255, 0, 0, 1), inset 0 0 20px rgba(0, 0, 0, 0.7);
+      }
+    }
+
+    /* Gore-stained text */
+    .gore-text {
+      text-shadow:
+        2px 2px 0 rgba(139, 0, 0, 0.8),
+        4px 4px 0 rgba(80, 0, 0, 0.6),
+        6px 6px 8px rgba(0, 0, 0, 0.9);
+      color: #ff4444;
+    }
+
+    /* Infection stages */
+    .stage-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      border: 3px solid;
+      position: relative;
+      overflow: hidden;
+      animation: stage-throb 1.5s infinite;
+    }
+
+    .stage-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .stage-runner {
+      border-color: #ffd700;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+
+    .stage-stalker {
+      border-color: #ff9800;
+      box-shadow: 0 0 20px rgba(255, 152, 0, 0.5);
+    }
+
+    .stage-clicker {
+      border-color: #ff5722;
+      box-shadow: 0 0 20px rgba(255, 87, 34, 0.5);
+    }
+
+    .stage-bloater {
+      border-color: #8b0000;
+      box-shadow: 0 0 30px rgba(139, 0, 0, 0.8);
+    }
+
+    @keyframes stage-throb {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.08);
+      }
+    }
+
+    /* Decayed panels */
+    .panel-gore {
+      background: linear-gradient(135deg, #1a0a0a 0%, #0d0505 100%);
+      border: 2px solid #8b2020;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-gore::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(139, 0, 0, 0.1) 2px, rgba(139, 0, 0, 0.1) 4px);
+      pointer-events: none;
+    }
+
+    .panel-header-gore {
+      background: linear-gradient(90deg, rgba(139, 0, 0, 0.3) 0%, transparent 100%);
+      border-bottom: 2px solid #8b2020;
+      padding: 12px 16px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #ff6666;
+      font-family: 'VT323', monospace;
+    }
+
+    /* Remove default arrow and add custom styled arrow */
+    .select-infected,
+    .input-infected[type="select"],
+    select.input-infected,
+    #sym-fever,
+    #sym-aggression,
+    #sym-vision,
+    #sym-fungus,
+    #user-sector {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ff3333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      background-size: 16px;
+      padding-right: 48px;
+    }
+
+    .select-infected:hover,
+    .input-infected[type="select"]:hover,
+    select.input-infected:hover,
+    #sym-fever:hover,
+    #sym-aggression:hover,
+    #sym-vision:hover,
+    #sym-fungus:hover,
+    #user-sector:hover {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ff6666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    }
+
+    .select-infected:focus,
+    .input-infected[type="select"]:focus,
+    select.input-infected:focus,
+    #sym-fever:focus,
+    #sym-aggression:focus,
+    #sym-vision:focus,
+    #sym-fungus:focus,
+    #user-sector:focus {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ff4444' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    }
+
+    /* Buttons */
+    .btn-infected {
+      background: linear-gradient(135deg, #8b0000 0%, #4d0000 100%);
+      border: 2px solid #ff3333;
+      color: #ff9999;
+      padding: 12px 24px;
+      font-family: 'VT323', monospace;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+    }
+
+    .btn-infected:hover {
+      background: linear-gradient(135deg, #cc0000 0%, #8b0000 100%);
+      box-shadow: 0 0 25px rgba(255, 51, 51, 0.7);
+      transform: translateY(-2px);
+    }
+
+    .btn-infected:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Form inputs for main interface */
+    .input-infected {
+      background: #0a0a0a;
+      border: 2px solid #8b2020;
+      color: #ff3333;
+      padding: 12px 16px;
+      font-family: 'VT323', monospace;
+      font-size: 1.2rem;
+      width: 100%;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .input-infected:focus {
+      outline: none;
+      border-color: #ff3333;
+      box-shadow: 0 0 15px rgba(255, 51, 51, 0.5);
+      background: rgba(139, 0, 0, 0.05);
+    }
+
+    .input-infected::placeholder {
+      color: #663333;
+    }
+
+    /* Map */
+    .map-container {
+      background: linear-gradient(180deg, #0d1a0d 0%, #0a0f0a 100%);
+      border: 3px solid #8b2020;
+      position: relative;
+      overflow: hidden;
+      height: 300px;
+    }
+
+    .map-grid {
+      position: absolute;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+      background-repeat: no-repeat;
+      background-size: cover;
+      opacity: 0.5;
+    }
+
+    .zone-marker {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      border: 2px solid;
+    }
+
+    .zone-marker:hover {
+      transform: scale(1.4);
+      z-index: 100;
+    }
+
+    .marker-safe {
+      background: radial-gradient(circle, #4caf50, #1b5e20);
+      border-color: #81c784;
+      box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+    }
+
+    .marker-danger {
+      background: radial-gradient(circle, #ff0000, #8b0000);
+      border-color: #ff3333;
+      box-shadow: 0 0 25px rgba(255, 0, 0, 0.8);
+      animation: danger-pulse 0.7s infinite;
+    }
+
+    @keyframes danger-pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+      }
+
+      50% {
+        box-shadow: 0 0 35px rgba(255, 0, 0, 1);
+      }
+    }
+
+    /* Modal */
+    .calibration-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      backdrop-filter: blur(10px);
+    }
+
+    .calibration-container {
+      background: linear-gradient(135deg, #1a0a0a 0%, #0d0505 100%);
+      border: 4px solid #ff3333;
+      border-radius: 8px;
+      padding: 32px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 0 50px rgba(139, 0, 0, 0.8);
+    }
+
+    .calibration-title {
+      font-family: 'VT323', monospace;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #ff4444;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+      margin-bottom: 24px;
+    }
+
+    /* Inventory Modal */
+    #inventory-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    #inventory-modal:not(.hidden) {
+      display: flex;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #1a0a0a 0%, #0d0505 100%);
+      border: 4px solid #ff3333;
+      border-radius: 8px;
+      padding: 32px;
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .modal-content h3 {
+      font-family: 'VT323', monospace;
+      font-size: 1.8rem;
+      color: #ff4444;
+      margin-bottom: 24px;
+    }
+
+    .modal-content label {
+      display: block;
+      color: #ff6666;
+      font-family: 'VT323', monospace;
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 16px;
+      background: #0a0a0a;
+      border: 2px solid #8b2020;
+      color: #ff3333;
+      font-family: 'VT323', monospace;
+    }
+
+    /* Music Control */
+    .music-control {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1001;
+      background: rgba(10, 15, 10, 0.8);
+      border: 2px solid #8b2020;
+      border-radius: 50px;
+      padding: 8px 16px;
+      color: #d4e6d4;
+      font-family: 'VT323', monospace;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+
+    .music-control:hover {
+      background: rgba(139, 32, 32, 0.3);
+      border-color: #ff4444;
+      transform: scale(1.05);
+    }
+
+    .music-control.playing {
+      border-color: #4caf50;
+      box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
+    }
+
+    /* Clock Styles */
+    .clock-container {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1001;
+      background: rgba(10, 15, 10, 0.8);
+      border: 2px solid #8b2020;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-family: 'VT323', monospace;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 0 20px rgba(139, 0, 0, 0.3);
+      text-align: center;
+      transition: opacity 0.3s ease;
+    }
+
+    .clock-time {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #ff4444;
+      text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+      letter-spacing: 3px;
+      line-height: 1;
+    }
+
+    .clock-date {
+      font-size: 1rem;
+      color: #ff6666;
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+
+    .clock-label {
+      font-size: 0.8rem;
+      color: #8b2020;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* User info banner */
+    .user-info-banner {
+      background: linear-gradient(135deg, #1a0a0a 0%, #0d0505 100%);
+      border: 2px solid #8b2020;
+      border-radius: 8px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'VT323', monospace;
+    }
+
+    .user-faction-badge {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .faction-survivor {
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid #4caf50;
+      color: #4caf50;
+    }
+
+    .faction-firefly {
+      background: rgba(255, 152, 0, 0.2);
+      border: 1px solid #ff9800;
+      color: #ff9800;
+    }
+
+    .faction-fedra {
+      background: rgba(33, 150, 243, 0.2);
+      border: 1px solid #2196f3;
+      color: #2196f3;
+    }
+
+    /* Analytics Panel Styles */
+    .analytics-panel {
+      margin-top: 20px;
+      border-top: 2px solid #8b2020;
+      padding-top: 20px;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 15px;
+    }
+
+    .chart-container {
+      height: 200px;
+      position: relative;
+    }
+
+    .insight-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .trend-up {
+      color: #ff4444;
+    }
+
+    .trend-down {
+      color: #4caf50;
+    }
+
+    .trend-stable {
+      color: #ffaa00;
+    }
+
+    /* Current Location Marker */
+    .current-location-marker {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ff3333, #8b0000);
+      border: 3px solid #ffffff;
+      box-shadow: 0 0 30px rgba(255, 51, 51, 0.9), 0 0 60px rgba(255, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      animation: pulse-location 1.5s infinite;
+    }
+
+    @keyframes pulse-location {
+
+      0%,
+      100% {
+        box-shadow: 0 0 30px rgba(255, 51, 51, 0.9), 0 0 60px rgba(255, 0, 0, 0.5);
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      50% {
+        box-shadow: 0 0 50px rgba(255, 51, 51, 1), 0 0 80px rgba(255, 0, 0, 0.8);
+        transform: translate(-50%, -50%) scale(1.1);
+      }
+    }
+
+    /* Hidden class */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0a0a0a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #8b2020;
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #ff3333;
+    }
+
+    /* Content wrapper */
+    .content-wrapper {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+
+<body class="h-full overflow-hidden crt-flicker">
+  <!-- Audio element for music -->
+  <audio id="dark-music" loop preload="auto">
+    <source src="dark.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Music Control Button -->
+  <div class="music-control playing" id="musicControl" onclick="toggleMusic()">
+    <span id="musicIcon">🔊</span>
+    <span id="musicStatus">Playing</span>
+  </div>
+
+  <!-- IST Clock Display -->
+  <div class="clock-container" id="ist-clock">
+    <div class="clock-time" id="clock-time">23:04:11</div>
+    <div class="clock-date" id="clock-date">2024-01-15</div>
+    <div class="clock-label">INDIAN STANDARD TIME</div>
+  </div>
+
+  <div class="crt-scanlines"></div>
+  <div class="blood-bg"></div>
+  <div class="biohazard-warning">⚠️</div>
+
+  <div id="app" class="min-h-full w-full content-wrapper">
+    <!-- LOGIN/REGISTER PAGE -->
+    <div id="auth-page" class="min-h-full w-full">
+      <div class="crt-overlay"></div>
+      <div class="gore-bg">
+        <div class="gore-left"></div>
+        <div class="gore-right"></div>
+        <div class="decay-pattern"></div>
+        <div class="infected-aura aura-1"></div>
+        <div class="infected-aura aura-2"></div>
+        <div class="infected-aura aura-3"></div>
+        <div class="blood-splatter splatter-1">🩸</div>
+        <div class="blood-splatter splatter-2">🩸</div>
+        <div class="blood-splatter splatter-3">🩸</div>
+        <div class="blood-splatter splatter-4">🩸</div>
+        <div class="blood-splatter splatter-5">🩸</div>
+      </div>
+
+      <div class="auth-container">
+        <!-- LOGIN FORM -->
+        <div id="login-form" class="form-wrapper">
+          <h2 class="form-title">💀 WELCOME BACK 💀</h2>
+          <form id="login-form-element">
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input type="text" id="login-username" class="form-input" placeholder="Enter your username..." required>
+              <div class="error-message" id="login-username-error"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Faction</label>
+              <select id="login-role" class="form-input" required>
+                <option value="">Select your Faction</option>
+                <option value="survivor">Survivor</option>
+                <option value="firefly">Firefly</option>
+                <option value="fedra">FEDRA</option>
+              </select>
+              <div class="error-message" id="login-role-error"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" id="login-password" class="form-input" placeholder="Enter your password..."
+                required>
+              <div class="error-message" id="login-password-error"></div>
+            </div>
+            <button type="submit" class="submit-btn" id="login-submit">LOGIN</button>
+            <div id="login-error" class="error-message" style="text-align:center;margin-top:16px;"></div>
+          </form>
+          <div class="form-toggle">
+            Don't have an account? <a onclick="switchToRegister()">Create one</a>
+          </div>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="register-form" class="form-wrapper hidden">
+          <h2 class="form-title">💀 WELCOME 💀</h2>
+          <form id="register-form-element">
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input type="text" id="register-username" class="form-input" placeholder="Choose your callsign..."
+                minlength="3" required>
+              <div class="error-message" id="register-username-error"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Faction</label>
+              <select id="register-role" class="form-input" required>
+                <option value="">Select your Faction</option>
+                <option value="survivor">Survivor</option>
+                <option value="firefly">Firefly</option>
+                <option value="fedra">FEDRA</option>
+              </select>
+              <div class="error-message" id="register-role-error"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" id="register-password" class="form-input" placeholder="Create a password..."
+                minlength="6" required>
+              <div class="error-message" id="register-password-error"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm Password</label>
+              <input type="password" id="register-confirm" class="form-input" placeholder="Confirm your password..."
+                required>
+              <div class="error-message" id="register-confirm-error"></div>
+            </div>
+            <button type="submit" class="submit-btn" id="register-submit">ENTER THE SHADOWS</button>
+            <div id="register-error" class="error-message" style="text-align:center;margin-top:16px;"></div>
+          </form>
+          <div class="form-toggle">
+            Already have an account? <a onclick="switchToLogin()">Login</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LANDING PAGE (After Login) -->
+    <div id="landing-page" class="hidden min-h-full w-full">
+      <div class="py-16 px-4 text-center">
+        <div class="mb-8 pt-8">
+          <p class="text-lg tracking-widest text-red-500 lg-4 gore-text font-retro">▓▓▓ WARNING: BIOHAZARD DETECTED ▓▓▓
+          </p>
+          <h1 id="terminal-title" class="font-retro text-6xl md:text-7xl font-black mb-4 gore-text">THE CORDYCEPS
+            ARCHIVE
+          </h1>
+          <p id="terminal-msg" class="text-red-600 text-lg md:text-xl mt-4 tracking-wider font-retro">OUTBREAK IN
+            PROGRESS — ACCESS RESTRICTED</p>
+        </div>
+
+        <div class="inline-block px-8 py-4 bg-red-950/40 border-4 border-red-700 mb-12">
+          <p class="text-red-500 font-retro text-lg tracking-widest">INFECTION RATE: EXPONENTIAL</p>
+        </div>
+
+        <!-- DISEASE OVERVIEW SECTION -->
+        <div class="max-w-4xl mx-auto mb-8">
+          <div class="panel-gore p-6 rounded-lg">
+            <h2 class="font-retro text-2xl text-red-500 mb-4">🧠 CORDYCEPS BRAIN INFECTION</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              <div>
+                <p class="text-red-400 font-retro text-lg mb-3">▸ WHAT IS IT?</p>
+                <p class="text-red-600 text-sm leading-relaxed mb-4">
+                  A mutated strain of the Ophiocordyceps unilateralis fungus. It infects the human host by
+                  colonizing the brain tissue, taking control of motor functions while preserving basic life support.
+                  The infected become hyper-aggressive carriers, spreading through spores and bites.
+                </p>
+                <p class="text-red-600 text-sm leading-relaxed">
+                  <span class="text-red-400">Stage 1-2:</span> Host still partially conscious<br>
+                  <span class="text-red-400">Stage 3-4:</span> Complete neural takeover<br>
+                  <span class="text-red-400">Stage 5+:</span> Fungal fruiting bodies emerge
+                </p>
+              </div>
+
+              <div>
+                <p class="text-red-400 font-retro text-lg mb-3">▸ TRANSMISSION</p>
+                <ul class="text-red-600 text-sm leading-relaxed space-y-2">
+                  <li>• Direct contact with infected bodily fluids</li>
+                  <li>• Inhalation of airborne spores in close proximity</li>
+                  <li>• Contaminated water sources</li>
+                  <li>• Bites from infected hosts</li>
+                </ul>
+                <p class="text-red-400 text-sm mt-4 italic">Incubation period: 24-48 hours</p>
+                <p class="text-red-400 text-sm">Mortality rate: 94.7%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VACCINE PREPARATION METER - CONDITIONAL BASED ON FACTION -->
+        <div id="vaccine-container" class="max-w-4xl mx-auto mb-8">
+          <!-- Will be shown/hidden based on faction -->
+        </div>
+
+        <!-- INFECTION STAGES -->
+        <div class="max-w-4xl mx-auto mb-12">
+          <h2 class="font-retro text-2xl md:text-3xl text-red-500 mb-6">CORDYCEPS INFECTION STAGES</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="panel-gore p-6 rounded-lg text-center">
+              <div class="stage-icon stage-runner mb-4 mx-auto">
+                <img src="runner.jpeg" alt="runner">
+              </div>
+              <h3 class="font-retro text-lg text-yellow-400 mb-2">RUNNER</h3>
+              <p class="text-red-600 text-xs leading-relaxed">Hours 1-2. Still appears human. Highly aggressive.
+                Unstable CNS.</p>
+            </div>
+            <div class="panel-gore p-6 rounded-lg text-center">
+              <div class="stage-icon stage-stalker mb-4 mx-auto">
+                <img src="stalker.jpeg" alt="Stalker">
+              </div>
+              <h3 class="font-retro text-lg text-orange-400 mb-2">STALKER</h3>
+              <p class="text-red-600 text-xs leading-relaxed">Week 2-4. Fungal nodules emerging. Predatory tactics.
+                Coordinated hunting.</p>
+            </div>
+            <div class="panel-gore p-6 rounded-lg text-center">
+              <div class="stage-icon stage-clicker mb-4 mx-auto">
+                <img src="clicker.jpeg" alt="Clicker">
+              </div>
+              <h3 class="font-retro text-lg text-orange-600 mb-2">CLICKER</h3>
+              <p class="text-red-600 text-xs leading-relaxed">Year 1+. Complete blindness. Echolocation. Hardened shell.
+                EXTREME DANGER.</p>
+            </div>
+            <div class="panel-gore p-6 rounded-lg text-center">
+              <div class="stage-icon stage-bloater mb-4 mx-auto">
+                <img src="bloater1.jpg" alt="Bloater">
+              </div>
+              <h3 class="font-retro text-lg text-red-700 mb-2">BLOATER</h3>
+              <p class="text-red-600 text-xs leading-relaxed">Years 10+. Massive fungal body. Spore delivery system.
+                CANNOT BE KILLED.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ENTER BUTTON -->
+        <div class="max-w-2xl mx-auto mt-8">
+          <button onclick="showSymptomAssessment()" class="btn-infected w-full py-4 px-12 text-xl">
+            BEGIN ASSESSMENT →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SYMPTOM ASSESSMENT MODAL -->
+    <div id="symptom-modal" class="calibration-backdrop hidden">
+      <div class="calibration-container">
+        <div class="calibration-title">☣️ SYMPTOM ASSESSMENT</div>
+
+        <!-- User Info Banner -->
+        <div id="user-info-banner" class="user-info-banner">
+          <span id="user-name-display"></span>
+          <span id="user-faction-badge" class="user-faction-badge"></span>
+        </div>
+
+        <div class="space-y-5 text-red-400 font-retro text-lg">
+          <div>
+            <label class="block mb-2">1. Fever level?</label>
+            <select id="sym-fever" class="input-infected rounded w-full">
+              <option value="0">None - Normal temperature</option>
+              <option value="10">Mild - Slight warmth</option>
+              <option value="20">High - Severe fever</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block mb-2">2. Aggression / Irritability?</label>
+            <select id="sym-aggression" class="input-infected rounded w-full">
+              <option value="0">Normal - Calm</option>
+              <option value="10">Irritable - Easily agitated</option>
+              <option value="20">Violent - Uncontrollable rage</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block mb-2">3. Vision disturbance?</label>
+            <select id="sym-vision" class="input-infected rounded w-full">
+              <option value="0">Clear - Normal vision</option>
+              <option value="10">Blurred - Difficulty focusing</option>
+              <option value="20">Severe - Almost blind</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block mb-2">4. Fungal skin growth?</label>
+            <select id="sym-fungus" class="input-infected rounded w-full">
+              <option value="0">None - Clean skin</option>
+              <option value="15">Minor - Small patches</option>
+              <option value="30">Advanced - Extensive growth</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block mb-2">5. Current Sector?</label>
+            <select id="user-sector" class="input-infected rounded w-full">
+              <option value="">SELECT SECTOR...</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="submit-symptoms" class="btn-infected w-full mt-8 rounded text-lg py-4">
+          ANALYZE BIOMETRICS
+        </button>
+      </div>
+    </div>
+
+    <!-- COMMAND CENTER (Main Interface) with Analytics -->
+    <div id="command-center" class="hidden min-h-full w-full p-4 md:p-6">
+      <!-- Header -->
+      <div class="panel-gore mb-6 rounded-lg p-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div
+              class="w-14 h-14 rounded-lg flex items-center justify-center text-3xl border-2 border-red-500 bg-red-900/30">
+              🧬
+            </div>
+            <div>
+              <h1 class="font-retro text-xl text-red-500" id="user-sector-display">SECTOR UNKNOWN</h1>
+              <p class="text-red-700 text-sm font-retro" id="user-status">OPERATIVE</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-red-700 text-xs font-retro">FACTION</p>
+            <p class="font-retro" id="user-faction-display">NONE</p>
+            <p class="text-red-700 text-xs font-retro mt-1">INFECTION STAGE</p>
+            <p class="font-retro text-red-400" id="infection-stage-display">UNINFECTED</p>
+          </div>
+          <button id="logout-btn"
+            class="px-6 py-2 bg-red-950 border-2 border-red-700 rounded text-red-400 hover:bg-red-900 transition-all text-sm font-retro">DISCONNECT</button>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column - Biometrics -->
+        <div class="space-y-6">
+          <!-- Full Biometric Profile -->
+          <div class="panel-gore rounded-lg overflow-hidden">
+            <div class="panel-header-gore">🧬 FULL BIOMETRIC PROFILE</div>
+            <div class="p-4">
+              <div class="grid grid-cols-1 gap-4 text-red-400 font-retro text-lg">
+                <div class="panel-gore p-3 rounded">
+                  <div class="text-red-600 text-sm">BLOOD PRESSURE</div>
+                  <div id="bio-bp">120 / 80</div>
+                </div>
+
+                <div class="panel-gore p-3 rounded">
+                  <div class="text-red-600 text-sm">BLOOD INFECTION</div>
+                  <div id="bio-infection">0%</div>
+                </div>
+
+                <div class="panel-gore p-3 rounded">
+                  <div class="text-red-600 text-sm">BLOOD SUGAR</div>
+                  <div id="bio-sugar">95 mg/dL</div>
+                </div>
+
+                <div class="panel-gore p-3 rounded">
+                  <div class="text-red-600 text-sm">BODY HYDRATION</div>
+                  <div id="bio-water">75%</div>
+                </div>
+
+                <div class="panel-gore p-3 rounded">
+                  <div class="text-red-600 text-sm">HEART RATE</div>
+                  <div id="bio-heart">72 BPM</div>
+                </div>
+
+                <div class="panel-gore p-3 rounded">
+                  <div class="text-red-600 text-sm">OXYGEN LEVEL</div>
+                  <div id="bio-oxygen">98%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center Column -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Health Status Bar -->
+          <div class="panel-gore rounded-lg overflow-hidden">
+            <div class="panel-header-gore">❤️ HEALTH MONITOR</div>
+            <div class="p-4">
+              <div class="mb-4">
+                <div class="flex justify-between text-sm mb-2">
+                  <span class="text-red-600">HEALTH LEVEL</span>
+                  <span class="text-red-400 font-retro" id="health-pct">85%</span>
+                </div>
+                <div class="w-full h-8 bg-black/50 border-2 border-red-700 rounded overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-green-600 via-yellow-600 to-red-600" id="health-bar"
+                    style="width: 85%;"></div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-black/40 p-3 rounded border border-red-900/50">
+                  <div class="text-red-600 text-sm">INFECTION STAGE</div>
+                  <div class="font-retro text-orange-400 text-xl" id="infection-stage-detail">UNINFECTED</div>
+                </div>
+                <div class="bg-black/40 p-3 rounded border border-red-900/50">
+                  <div class="text-red-600 text-sm">SECTOR</div>
+                  <div class="font-retro text-blue-400 text-xl" id="sector-detail">UNKNOWN</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inventory Management (LocalStorage only) -->
+          <div class="panel-gore rounded-lg overflow-hidden">
+            <div class="panel-header-gore">🎒 INVENTORY</div>
+            <div class="p-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="flex justify-between items-center p-3 bg-black/30 rounded border border-red-900/50">
+                  <span class="text-red-500">Medkits</span>
+                  <span class="font-retro text-red-400 text-xl" id="inv-medkits">3</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-black/30 rounded border border-red-900/50">
+                  <span class="text-red-500">Ammo</span>
+                  <span class="font-retro text-red-400 text-xl" id="inv-ammo">24</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-black/30 rounded border border-red-900/50">
+                  <span class="text-red-500">Rags</span>
+                  <span class="font-retro text-red-400 text-xl" id="inv-rags">8</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-black/30 rounded border border-red-900/50">
+                  <span class="text-red-500">Alcohol</span>
+                  <span class="font-retro text-red-400 text-xl" id="inv-alcohol">5</span>
+                </div>
+                <div
+                  class="flex justify-between items-center p-3 bg-black/30 rounded border border-red-900/50 col-span-2">
+                  <span class="text-red-500">Trading Cards</span>
+                  <span class="font-retro text-yellow-500 text-xl" id="inv-cards">12</span>
+                </div>
+              </div>
+
+              <button id="update-inventory-btn" class="btn-infected w-full mt-4 rounded">
+                UPDATE INVENTORY
+              </button>
+            </div>
+          </div>
+
+          <!-- ZONE ANALYTICS SECTION -->
+          <div class="panel-gore rounded-lg overflow-hidden">
+            <div class="panel-header-gore">📊 ZONE ANALYTICS DASHBOARD</div>
+            <div class="p-4">
+              <!-- Zone Selector -->
+              <div class="mb-4">
+                <label class="block text-red-500 text-sm mb-2 font-retro">SELECT ZONE FOR ANALYSIS</label>
+                <select id="analytics-zone-selector" class="input-infected rounded w-full">
+                  <option value="">Choose a sector...</option>
+                </select>
+              </div>
+
+              <!-- Analytics Content -->
+              <div id="analytics-content" class="hidden">
+                <!-- Charts Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <!-- Infection Chart -->
+                  <div class="bg-black/40 p-3 rounded border border-red-900/50">
+                    <h3 class="font-retro text-red-500 text-sm mb-2">📈 INFECTION FORECAST (7 DAYS)</h3>
+                    <div class="h-32 relative">
+                      <canvas id="infection-chart"></canvas>
+                    </div>
+                    <div id="infection-trend" class="mt-1 text-xs text-center"></div>
+                  </div>
+
+                  <!-- Resource Chart -->
+                  <div class="bg-black/40 p-3 rounded border border-red-900/50">
+                    <h3 class="font-retro text-red-500 text-sm mb-2">🥫 RESOURCES</h3>
+                    <div class="h-32 relative">
+                      <canvas id="resource-chart"></canvas>
+                    </div>
+                    <div id="resource-summary" class="mt-1 text-xs text-center"></div>
+                  </div>
+                </div>
+
+                <!-- Quick Insights -->
+                <div class="grid grid-cols-3 gap-2 mt-3">
+                  <div class="bg-black/40 p-2 rounded border border-red-900/50 text-center">
+                    <div class="text-red-600 text-xs">DANGER</div>
+                    <div class="font-retro text-sm" id="danger-level">-</div>
+                  </div>
+                  <div class="bg-black/40 p-2 rounded border border-red-900/50 text-center">
+                    <div class="text-red-600 text-xs">LOOT</div>
+                    <div class="font-retro text-sm" id="loot-quality">-</div>
+                  </div>
+                  <div class="bg-black/40 p-2 rounded border border-red-900/50 text-center">
+                    <div class="text-red-600 text-xs">ACTIVITY</div>
+                    <div class="font-retro text-sm" id="survivor-activity">-</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Loading Indicator -->
+              <div id="analytics-loading" class="text-center py-4 hidden">
+                <div class="text-red-400 font-retro">🔄 LOADING ZONE DATA...</div>
+              </div>
+
+              <!-- No Data Message -->
+              <div id="analytics-no-data" class="text-center py-4 hidden">
+                <div class="text-red-500 text-sm">📊 NO DATA FOR THIS ZONE</div>
+                <div class="text-red-700 text-xs mt-1">Select another zone or add sample data</div>
+              </div>
+
+              <!-- Admin Panel -->
+              <div id="admin-panel" class="mt-4 p-3 bg-black/40 border border-red-900 rounded hidden">
+                <h3 class="font-retro text-red-500 mb-2 text-sm">⚙️ ADMIN</h3>
+                <div class="flex gap-2">
+                  <button onclick="addSampleData()" class="btn-infected text-xs py-1 px-2">
+                    ADD SAMPLE DATA
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TACTICAL MAP panel -->
+          <div class="panel-gore rounded-lg overflow-hidden">
+            <div class="panel-header-gore">🗺️ TACTICAL MAP</div>
+            <div class="map-container" id="tactical-map" style="cursor: pointer;">
+              <div class="map-grid"></div>
+              <div id="markers-layer"></div>
+              <!-- Current Location Marker (will be positioned by JavaScript) -->
+              <div id="current-location-marker" class="current-location-marker hidden">
+                📍
+              </div>
+              <!-- Click overlay -->
+              <div id="map-click-overlay"
+                style="position: absolute; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.3s;"
+                onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+                <span
+                  class="bg-red-900/90 text-red-400 px-6 py-3 rounded-lg border-2 border-red-500 font-retro text-xl">
+                  CLICK TO OPEN MAP →
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVENTORY UPDATE MODAL -->
+    <div id="inventory-modal" class="hidden">
+      <div class="modal-content">
+        <h3>📦 UPDATE INVENTORY</h3>
+
+        <label>Medkits</label>
+        <input id="inv-medkits-input" type="number" min="0" value="3">
+
+        <label>Ammunition</label>
+        <input id="inv-ammo-input" type="number" min="0" value="24">
+
+        <label>Rags</label>
+        <input id="inv-rags-input" type="number" min="0" value="8">
+
+        <label>Alcohol</label>
+        <input id="inv-alcohol-input" type="number" min="0" value="5">
+
+        <label>Trading Cards</label>
+        <input id="inv-cards-input" type="number" min="0" value="12">
+
+        <div class="flex gap-4 mt-6">
+          <button id="save-inventory-btn" class="btn-infected flex-1">SAVE</button>
+          <button id="close-inventory-btn" class="btn-infected flex-1 bg-gray-800">CANCEL</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS MESSAGE -->
+    <div id="success-message" class="success-message">
+      <div class="success-icon">✓</div>
+      <div class="success-text">AUTHENTICATION COMPLETE</div>
+      <div class="success-subtext">Connecting to terminal...</div>
+    </div>
+  </div>
+
+  <script>
+    // ===== GLOBAL VARIABLES =====
+    let currentUser = null;
+    let userFaction = null;
+    let username = null;
+    let userId = null;
+
+    // Chart instances
+    let infectionChart = null;
+    let resourceChart = null;
+
+    // ===== SECTOR DATA =====
+    const sectorData = {
+      safe: [
+        "Fargo Farmstead", "Green Bay Outpost", "Des Moines Silos", "Salem Outpost",
+        "Burlington Commune", "Jackson County", "Eugene Community", "Crater Lake",
+        "Yosemite Valley", "Missoula Valley", "Boise Farmlands", "Asheville Outpost",
+        "Nashville Soundstage", "Austin Community", "Santa Fe Pueblo", "Charlotte Settlement",
+        "Blue Ridge Camp", "Carlsbad Caverns", "San Antonio Mission", "Bar Harbor Island",
+        "Virginia Beach Camp", "Great Falls Station", "Thunder Bay Camp", "Quebec City Walls",
+        "Palm Springs Oasis", "Flagstaff Heights", "Grand Junction Camp", "Rapid City Caverns",
+        "Louisville Distillery", "Roanoke Colony"
+      ],
+      danger: [
+        "NYC Ruins", "Pittsburgh QZ", "Atlanta Ruins", "Los Angeles Wasteland",
+        "Las Vegas Ruins", "Washington DC Ruins", "New Orleans Ruins", "Houston Refinery",
+        "Detroit Ruins", "Kansas City Ruins", "Yellowstone Caldera", "Seattle Downtown",
+        "Philadelphia Ruins", "Miami Beach Ruins", "Minneapolis Crater", "St Louis Arch"
+      ],
+      arcade: [
+        "SAFE POINT — Jackson", "SAFE POINT — Blue Ridge", "SAFE POINT — Austin",
+        "SAFE POINT — Eugene", "SAFE POINT — Carlsbad", "SAFE POINT — Vermont",
+        "SAFE POINT — Yosemite", "SAFE POINT — Thunder Bay", "SAFE POINT — Boise"
+      ],
+      firefly: [
+        "FIREFLY HQ — Boston", "Cell — Pittsburgh", "Cell — Nashville", "Cell — Eugene",
+        "Firefly Lab — Salt Lake", "Cell — Austin", "Cell — Charlotte",
+        "Safehouse — Crater Lake", "Safehouse — Thunder Bay", "Cell — Memphis",
+        "LIBERATED — Asheville", "LIBERATED — Eugene", "REBEL LINK — Chicago",
+        "REBEL LINK — Denver", "Arsenal — Boston Harbor"
+      ],
+      fedra: [
+        "COMMAND — Boston QZ", "COMMAND — Dallas", "COMMAND — Denver",
+        "Checkpoint — Toledo", "Naval — Jacksonville", "CAPITAL — Pentagon",
+        "Bunker — NORAD", "Naval HQ — Norfolk", "Command — Richmond",
+        "Border — San Diego", "Compound — Salt Lake", "Station — Bismarck",
+        "Bunker — Wichita", "Dam — Hoover", "PATROL ALPHA", "PATROL BETA",
+        "PATROL GAMMA", "NEXT LINK — Chicago", "NEXT LINK — Memphis",
+        "Station — Sudbury"
+      ]
+    };
+
+    // Map coordinates for each sector (simulated positions)
+    const sectorCoordinates = {
+      // Safe zones
+      "Fargo Farmstead": { x: 15, y: 20 },
+      "Green Bay Outpost": { x: 20, y: 25 },
+      "Des Moines Silos": { x: 25, y: 30 },
+      "Salem Outpost": { x: 30, y: 35 },
+      "Burlington Commune": { x: 35, y: 40 },
+      "Jackson County": { x: 40, y: 45 },
+      "Eugene Community": { x: 45, y: 50 },
+      "Crater Lake": { x: 50, y: 55 },
+      "Yosemite Valley": { x: 55, y: 60 },
+      "Missoula Valley": { x: 60, y: 65 },
+      "Boise Farmlands": { x: 65, y: 70 },
+      "Asheville Outpost": { x: 70, y: 75 },
+      "Nashville Soundstage": { x: 75, y: 80 },
+      "Austin Community": { x: 80, y: 85 },
+      "Santa Fe Pueblo": { x: 85, y: 80 },
+      "Charlotte Settlement": { x: 80, y: 75 },
+      "Blue Ridge Camp": { x: 75, y: 70 },
+      "Carlsbad Caverns": { x: 70, y: 65 },
+      "San Antonio Mission": { x: 65, y: 60 },
+      "Bar Harbor Island": { x: 60, y: 55 },
+      "Virginia Beach Camp": { x: 55, y: 50 },
+      "Great Falls Station": { x: 50, y: 45 },
+      "Thunder Bay Camp": { x: 45, y: 40 },
+      "Quebec City Walls": { x: 40, y: 35 },
+      "Palm Springs Oasis": { x: 35, y: 30 },
+      "Flagstaff Heights": { x: 30, y: 25 },
+      "Grand Junction Camp": { x: 25, y: 20 },
+      "Rapid City Caverns": { x: 20, y: 15 },
+      "Louisville Distillery": { x: 15, y: 10 },
+      "Roanoke Colony": { x: 10, y: 5 },
+
+      // Danger zones
+      "NYC Ruins": { x: 85, y: 15 },
+      "Pittsburgh QZ": { x: 80, y: 20 },
+      "Atlanta Ruins": { x: 75, y: 25 },
+      "Los Angeles Wasteland": { x: 70, y: 30 },
+      "Las Vegas Ruins": { x: 65, y: 35 },
+      "Washington DC Ruins": { x: 60, y: 40 },
+      "New Orleans Ruins": { x: 55, y: 45 },
+      "Houston Refinery": { x: 50, y: 50 },
+      "Detroit Ruins": { x: 45, y: 55 },
+      "Kansas City Ruins": { x: 40, y: 60 },
+      "Yellowstone Caldera": { x: 35, y: 65 },
+      "Seattle Downtown": { x: 30, y: 70 },
+      "Philadelphia Ruins": { x: 25, y: 75 },
+      "Miami Beach Ruins": { x: 20, y: 80 },
+      "Minneapolis Crater": { x: 15, y: 85 },
+      "St Louis Arch": { x: 10, y: 90 },
+
+      // Arcade points
+      "SAFE POINT — Jackson": { x: 45, y: 45 },
+      "SAFE POINT — Blue Ridge": { x: 50, y: 50 },
+      "SAFE POINT — Austin": { x: 55, y: 55 },
+      "SAFE POINT — Eugene": { x: 60, y: 60 },
+      "SAFE POINT — Carlsbad": { x: 65, y: 65 },
+      "SAFE POINT — Vermont": { x: 70, y: 70 },
+      "SAFE POINT — Yosemite": { x: 75, y: 75 },
+      "SAFE POINT — Thunder Bay": { x: 80, y: 80 },
+      "SAFE POINT — Boise": { x: 85, y: 85 },
+
+      // Firefly bases
+      "FIREFLY HQ — Boston": { x: 90, y: 10 },
+      "Cell — Pittsburgh": { x: 85, y: 15 },
+      "Cell — Nashville": { x: 80, y: 20 },
+      "Cell — Eugene": { x: 75, y: 25 },
+      "Firefly Lab — Salt Lake": { x: 70, y: 30 },
+      "Cell — Austin": { x: 65, y: 35 },
+      "Cell — Charlotte": { x: 60, y: 40 },
+      "Safehouse — Crater Lake": { x: 55, y: 45 },
+      "Safehouse — Thunder Bay": { x: 50, y: 50 },
+      "Cell — Memphis": { x: 45, y: 55 },
+      "LIBERATED — Asheville": { x: 40, y: 60 },
+      "LIBERATED — Eugene": { x: 35, y: 65 },
+      "REBEL LINK — Chicago": { x: 30, y: 70 },
+      "REBEL LINK — Denver": { x: 25, y: 75 },
+      "Arsenal — Boston Harbor": { x: 20, y: 80 },
+
+      // Fedra bases
+      "COMMAND — Boston QZ": { x: 15, y: 85 },
+      "COMMAND — Dallas": { x: 10, y: 80 },
+      "COMMAND — Denver": { x: 15, y: 75 },
+      "Checkpoint — Toledo": { x: 20, y: 70 },
+      "Naval — Jacksonville": { x: 25, y: 65 },
+      "CAPITAL — Pentagon": { x: 30, y: 60 },
+      "Bunker — NORAD": { x: 35, y: 55 },
+      "Naval HQ — Norfolk": { x: 40, y: 50 },
+      "Command — Richmond": { x: 45, y: 45 },
+      "Border — San Diego": { x: 50, y: 40 },
+      "Compound — Salt Lake": { x: 55, y: 35 },
+      "Station — Bismarck": { x: 60, y: 30 },
+      "Bunker — Wichita": { x: 65, y: 25 },
+      "Dam — Hoover": { x: 70, y: 20 },
+      "PATROL ALPHA": { x: 75, y: 15 },
+      "PATROL BETA": { x: 80, y: 10 },
+      "PATROL GAMMA": { x: 85, y: 5 },
+      "NEXT LINK — Chicago": { x: 90, y: 15 },
+      "NEXT LINK — Memphis": { x: 85, y: 20 },
+      "Station — Sudbury": { x: 80, y: 25 }
+    };
+
+    // ===== MUSIC CONTROL =====
+    const music = document.getElementById('dark-music');
+    const musicControl = document.getElementById('musicControl');
+    const musicIcon = document.getElementById('musicIcon');
+    const musicStatus = document.getElementById('musicStatus');
+
+    function toggleMusic() {
+      if (music.paused) {
+        music.play().catch(() => { });
+        musicControl.classList.add('playing');
+        musicIcon.textContent = '🔊';
+        musicStatus.textContent = 'Playing';
+      } else {
+        music.pause();
+        musicControl.classList.remove('playing');
+        musicIcon.textContent = '🔈';
+        musicStatus.textContent = 'Muted';
+      }
+    }
+
+    function attemptAutoPlay() {
+      music.play().then(() => {
+        musicControl.classList.add('playing');
+        musicIcon.textContent = '🔊';
+        musicStatus.textContent = 'Playing';
+      }).catch(error => {
+        musicControl.classList.remove('playing');
+        musicIcon.textContent = '🔈';
+        musicStatus.textContent = 'Click to play';
+
+        const startMusicOnInteraction = () => {
+          music.play().catch(() => { });
+          document.removeEventListener('click', startMusicOnInteraction);
+        };
+        document.addEventListener('click', startMusicOnInteraction);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', attemptAutoPlay);
+
+    // ===== IST CLOCK FUNCTION =====
+    function updateISTClock() {
+      const now = new Date();
+      const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+
+      const hours = istTime.getUTCHours().toString().padStart(2, '0');
+      const minutes = istTime.getUTCMinutes().toString().padStart(2, '0');
+      const seconds = istTime.getUTCSeconds().toString().padStart(2, '0');
+      const timeString = `${hours}:${minutes}:${seconds}`;
+
+      const year = istTime.getUTCFullYear();
+      const month = (istTime.getUTCMonth() + 1).toString().padStart(2, '0');
+      const day = istTime.getUTCDate().toString().padStart(2, '0');
+      const dateString = `${year}-${month}-${day}`;
+
+      document.getElementById('clock-time').textContent = timeString;
+      document.getElementById('clock-date').textContent = dateString;
+    }
+
+    updateISTClock();
+    setInterval(updateISTClock, 1000);
+
+    // ===== FORM SWITCHING =====
+    function switchToRegister() {
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('register-form').classList.remove('hidden');
+      clearForm('login-form-element');
+      clearForm('register-form-element');
+    }
+
+    function switchToLogin() {
+      document.getElementById('register-form').classList.add('hidden');
+      document.getElementById('login-form').classList.remove('hidden');
+      clearForm('login-form-element');
+      clearForm('register-form-element');
+    }
+
+    function clearForm(formId) {
+      document.getElementById(formId).reset();
+      document.querySelectorAll(`#${formId} .error-message`).forEach(el => {
+        el.classList.remove('show');
+        el.textContent = '';
+      });
+    }
+
+    function showError(fieldId, message) {
+      const errorEl = document.getElementById(fieldId);
+      errorEl.textContent = message;
+      errorEl.classList.add('show');
+    }
+
+    function clearError(fieldId) {
+      const errorEl = document.getElementById(fieldId);
+      errorEl.textContent = '';
+      errorEl.classList.remove('show');
+    }
+
+    function showSuccess() {
+      document.getElementById('success-message').classList.add('show');
+      setTimeout(() => {
+        document.getElementById('success-message').classList.remove('show');
+      }, 1500);
+    }
+
+    // ===== VACCINE METER UPDATE FUNCTION (Only for non-FEDRA factions) =====
+    function updateVaccineMeter() {
+      // Only show vaccine meter for non-FEDRA factions
+      if (userFaction === 'fedra') {
+        document.getElementById('vaccine-container').innerHTML = '';
+        return;
+      }
+
+      // Create vaccine meter HTML
+      const vaccineHtml = `
+        <div class="panel-gore p-6 rounded-lg">
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="font-retro text-2xl text-red-500">💉 VACCINE DEVELOPMENT</h2>
+            <span class="text-red-400 font-retro text-xl" id="vaccine-percent">37%</span>
+          </div>
+          
+          <!-- Main progress bar -->
+          <div class="w-full h-8 bg-black/50 border-2 border-red-700 rounded-full overflow-hidden mb-3">
+            <div class="h-full bg-gradient-to-r from-red-900 via-red-600 to-green-600" 
+                 id="vaccine-bar" 
+                 style="width: 37%; transition: width 0.5s ease;"></div>
+          </div>
+          
+          <!-- Status details -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
+            <div class="bg-black/40 p-3 rounded border border-red-900/50">
+              <div class="text-red-600">CURRENT PHASE</div>
+              <div class="font-retro text-yellow-400 text-lg" id="vaccine-phase">HUMAN TRIALS</div>
+            </div>
+            <div class="bg-black/40 p-3 rounded border border-red-900/50">
+              <div class="text-red-600">EST. COMPLETION</div>
+              <div class="font-retro text-blue-400 text-lg" id="vaccine-time">14 DAYS</div>
+            </div>
+            <div class="bg-black/40 p-3 rounded border border-red-900/50">
+              <div class="text-red-600">DOSES READY</div>
+              <div class="font-retro text-green-400 text-lg" id="vaccine-doses">342</div>
+            </div>
+          </div>
+          
+          <!-- Research notes -->
+          <div class="mt-4 p-3 bg-red-950/30 border border-red-800 rounded">
+            <p class="text-red-500 text-xs font-retro tracking-wider">
+              ⚠️ FIREFLY RESEARCH TEAM REPORT: Firefly lab in Salt Lake City reports successful synthesis of 
+              fungal antigen. Vaccine candidate F-237 shows 78% efficacy in primate trials. FEDRA forces 
+              attempting to intercept research convoy.
+            </p>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('vaccine-container').innerHTML = vaccineHtml;
+
+      // Update vaccine progress
+      const vaccineElement = document.getElementById('vaccine-bar');
+      const percentElement = document.getElementById('vaccine-percent');
+      const phaseElement = document.getElementById('vaccine-phase');
+      const timeElement = document.getElementById('vaccine-time');
+      const dosesElement = document.getElementById('vaccine-doses');
+
+      if (!vaccineElement) return;
+
+      let progress = localStorage.getItem('vaccineProgress');
+
+      if (!progress) {
+        progress = Math.floor(Math.random() * 15) + 30;
+        localStorage.setItem('vaccineProgress', progress);
+      } else {
+        progress = parseInt(progress);
+      }
+
+      if (userFaction === 'firefly') {
+        progress = Math.min(progress + 2, 78);
+      } else if (userFaction === 'survivor') {
+        progress = Math.max(progress - 3, 25);
+      }
+
+      vaccineElement.style.width = progress + '%';
+      percentElement.textContent = progress + '%';
+
+      if (progress < 20) {
+        phaseElement.textContent = 'EARLY RESEARCH';
+        timeElement.textContent = '30+ DAYS';
+        dosesElement.textContent = '0';
+      } else if (progress < 40) {
+        phaseElement.textContent = 'LAB TESTING';
+        timeElement.textContent = '21 DAYS';
+        dosesElement.textContent = '127';
+      } else if (progress < 60) {
+        phaseElement.textContent = 'HUMAN TRIALS';
+        timeElement.textContent = '14 DAYS';
+        dosesElement.textContent = '342';
+      } else if (progress < 80) {
+        phaseElement.textContent = 'FIELD TESTING';
+        timeElement.textContent = '7 DAYS';
+        dosesElement.textContent = '891';
+      } else {
+        phaseElement.textContent = 'MASS PRODUCTION';
+        timeElement.textContent = 'IMMINENT';
+        dosesElement.textContent = '2,456';
+      }
+
+      localStorage.setItem('vaccineProgress', progress);
+    }
+
+    // ===== LOCATION MARKER FUNCTION =====
+    function updateLocationMarker(sector) {
+      const marker = document.getElementById('current-location-marker');
+      if (!marker) return;
+
+      if (sector && sectorCoordinates[sector]) {
+        const coords = sectorCoordinates[sector];
+        marker.style.left = coords.x + '%';
+        marker.style.top = coords.y + '%';
+        marker.classList.remove('hidden');
+
+        // Add tooltip
+        marker.title = `Current Location: ${sector}`;
+      } else {
+        marker.classList.add('hidden');
+      }
+    }
+
+    // ===== ANALYTICS FUNCTIONS =====
+
+    // Populate analytics zone selector (with faction filtering)
+    function populateAnalyticsZoneSelector() {
+      const selector = document.getElementById('analytics-zone-selector');
+      if (!selector) return;
+
+      selector.innerHTML = '<option value="">Choose a sector...</option>';
+
+      let allZones = [];
+
+      // Add all sectors with faction-based filtering
+      sectorData.safe.forEach(sector => {
+        allZones.push(sector);
+      });
+
+      sectorData.danger.forEach(sector => {
+        allZones.push(sector);
+      });
+
+      sectorData.arcade.forEach(sector => {
+        allZones.push(sector);
+      });
+
+      // Survivors see NO military bases
+      if (userFaction !== 'survivor') {
+        if (userFaction !== 'fedra') {
+          sectorData.firefly.forEach(sector => {
+            allZones.push(sector);
+          });
+        }
+
+        if (userFaction !== 'firefly') {
+          sectorData.fedra.forEach(sector => {
+            allZones.push(sector);
+          });
+        }
+      }
+
+      const uniqueZones = [...new Set(allZones)];
+      uniqueZones.sort();
+
+      uniqueZones.forEach(zone => {
+        const option = document.createElement('option');
+        option.value = zone;
+        option.textContent = zone;
+        selector.appendChild(option);
+      });
+    }
+
+    // Load zone analytics when selector changes
+    document.getElementById('analytics-zone-selector')?.addEventListener('change', function () {
+      const zone = this.value;
+      if (zone) {
+        loadZoneAnalytics(zone);
+      } else {
+        document.getElementById('analytics-content').classList.add('hidden');
+        document.getElementById('analytics-no-data').classList.remove('hidden');
+        document.getElementById('analytics-loading').classList.add('hidden');
+      }
+    });
+
+    // Main function to load zone data
+    async function loadZoneAnalytics(zone) {
+      document.getElementById('analytics-loading').classList.remove('hidden');
+      document.getElementById('analytics-content').classList.add('hidden');
+      document.getElementById('analytics-no-data').classList.add('hidden');
+
+      try {
+        let infectionData = [];
+        try {
+          const infectionRes = await fetch(`/api/infection-history/${encodeURIComponent(zone)}`);
+          if (infectionRes.ok) {
+            infectionData = await infectionRes.json();
+          }
+        } catch (e) {
+          console.log('Infection fetch failed, using sample');
+        }
+
+        let resourceData = null;
+        try {
+          const resourceRes = await fetch(`/api/resource-data/${encodeURIComponent(zone)}`);
+          if (resourceRes.ok) {
+            const data = await resourceRes.json();
+            resourceData = data.resource;
+          }
+        } catch (e) {
+          console.log('Resource fetch failed, using sample');
+        }
+
+        document.getElementById('analytics-loading').classList.add('hidden');
+        document.getElementById('analytics-content').classList.remove('hidden');
+
+        updateInfectionChart(infectionData.length > 0 ? infectionData : getSampleInfectionData(zone));
+        updateResourceChart(resourceData || getSampleResourceData(zone));
+        updateInsights(zone, resourceData);
+
+      } catch (err) {
+        console.error('Error loading analytics:', err);
+        document.getElementById('analytics-loading').classList.add('hidden');
+        document.getElementById('analytics-no-data').classList.remove('hidden');
+      }
+    }
+
+    function getSampleInfectionData(zone) {
+      const baseRate = zone.includes('Ruins') ? 85 :
+        zone.includes('QZ') ? 65 :
+          zone.includes('SAFE') ? 15 : 45;
+
+      return [
+        { infectionRate: baseRate - 5 },
+        { infectionRate: baseRate - 3 },
+        { infectionRate: baseRate },
+        { infectionRate: baseRate + 2 },
+        { infectionRate: baseRate + 4 },
+        { infectionRate: baseRate + 6 },
+        { infectionRate: baseRate + 8 }
+      ];
+    }
+
+    function getSampleResourceData(zone) {
+      if (zone.includes('Ruins')) {
+        return { ammo: 45, food: 10, medical: 15, tools: 20, other: 10 };
+      } else if (zone.includes('QZ')) {
+        return { ammo: 30, food: 25, medical: 20, tools: 15, other: 10 };
+      } else if (zone.includes('SAFE')) {
+        return { ammo: 10, food: 45, medical: 25, tools: 10, other: 10 };
+      } else {
+        return { ammo: 25, food: 25, medical: 20, tools: 15, other: 15 };
+      }
+    }
+
+    function updateInfectionChart(data) {
+      const ctx = document.getElementById('infection-chart')?.getContext('2d');
+      if (!ctx) return;
+
+      const values = data.map(d => d.infectionRate);
+      const labels = ['D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'D-1', 'Now'];
+
+      const trend = values[values.length - 1] - values[0];
+      const trendEl = document.getElementById('infection-trend');
+      if (trend > 5) {
+        trendEl.innerHTML = '📈 RISING';
+        trendEl.className = 'mt-1 text-xs text-center text-red-400';
+      } else if (trend < -5) {
+        trendEl.innerHTML = '📉 FALLING';
+        trendEl.className = 'mt-1 text-xs text-center text-green-400';
+      } else {
+        trendEl.innerHTML = '➡️ STABLE';
+        trendEl.className = 'mt-1 text-xs text-center text-yellow-400';
+      }
+
+      if (infectionChart) infectionChart.destroy();
+
+      infectionChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values,
+            borderColor: '#ff4444',
+            backgroundColor: 'rgba(255,68,68,0.1)',
+            borderWidth: 2,
+            pointBackgroundColor: '#ff4444',
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              grid: { color: 'rgba(139,0,0,0.3)' },
+              ticks: { color: '#ff6666', font: { size: 8 } }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#ff6666', font: { size: 8 } }
+            }
+          }
+        }
+      });
+    }
+
+    function updateResourceChart(data) {
+      const ctx = document.getElementById('resource-chart')?.getContext('2d');
+      if (!ctx) return;
+
+      const values = [data.ammo, data.food, data.medical, data.tools, data.other];
+      const total = values.reduce((a, b) => a + b, 0);
+
+      document.getElementById('resource-summary').innerHTML =
+        `A:${data.ammo}% F:${data.food}% M:${data.medical}% T:${data.tools}% O:${data.other}%`;
+
+      if (resourceChart) resourceChart.destroy();
+
+      resourceChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Ammo', 'Food', 'Medical', 'Tools', 'Other'],
+          datasets: [{
+            data: values,
+            backgroundColor: ['#ff4444', '#4caf50', '#2196f3', '#ff9800', '#9c27b0'],
+            borderColor: '#8b2020',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          cutout: '60%'
+        }
+      });
+    }
+
+    function updateInsights(zone, resourceData) {
+      let danger = 'MODERATE';
+      if (zone.includes('Ruins') || zone.includes('Wasteland')) {
+        danger = 'CRITICAL';
+      } else if (zone.includes('QZ') || zone.includes('Refinery')) {
+        danger = 'HIGH';
+      } else if (zone.includes('SAFE') || zone.includes('Community')) {
+        danger = 'LOW';
+      }
+      document.getElementById('danger-level').textContent = danger;
+
+      let loot = 'FAIR';
+      if (resourceData) {
+        const total = resourceData.ammo + resourceData.food + resourceData.medical + resourceData.tools + resourceData.other;
+        if (total > 90) loot = 'EXCELLENT';
+        else if (total > 70) loot = 'GOOD';
+        else if (total < 40) loot = 'POOR';
+      }
+      document.getElementById('loot-quality').textContent = loot;
+
+      let activity = 'UNKNOWN';
+      if (zone.includes('SAFE')) activity = 'HIGH';
+      else if (zone.includes('QZ')) activity = 'MEDIUM';
+      else if (zone.includes('Ruins')) activity = 'LOW';
+      document.getElementById('survivor-activity').textContent = activity;
+    }
+
+    async function addSampleData() {
+      try {
+        await fetch('/api/admin/sample-infection', { method: 'POST' });
+        await fetch('/api/admin/sample-resources', { method: 'POST' });
+        alert('Sample data added!');
+        const zone = document.getElementById('analytics-zone-selector').value;
+        if (zone) loadZoneAnalytics(zone);
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    // ===== LOGIN =====
+    document.getElementById('login-form-element').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('login-username').value.trim();
+      const role = document.getElementById('login-role').value;
+      const password = document.getElementById('login-password').value;
+
+      clearError('login-error');
+      clearError('login-username-error');
+      clearError('login-role-error');
+      clearError('login-password-error');
+
+      if (!username) { showError('login-username-error', 'Username required'); return; }
+      if (!role) { showError('login-role-error', 'Role required'); return; }
+      if (password.length < 6) { showError('login-password-error', 'Password must be at least 6 characters'); return; }
+
+      const btn = document.getElementById('login-submit');
+      btn.disabled = true;
+      btn.textContent = 'AUTHENTICATING...';
+
+      try {
+        const res = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, role })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError('login-error', data.error || 'Login failed');
+          btn.disabled = false;
+          btn.textContent = 'LOGIN';
+          return;
+        }
+
+        // Initialize inventory in localStorage if not exists
+        let inventory = localStorage.getItem(`inventory_${data.user.id}`);
+        if (!inventory) {
+          inventory = { medkits: 3, ammo: 24, rags: 8, alcohol: 5, cards: 12 };
+          localStorage.setItem(`inventory_${data.user.id}`, JSON.stringify(inventory));
+        } else {
+          inventory = JSON.parse(inventory);
+        }
+
+        const userData = {
+          username: data.user.username,
+          role: data.user.role,
+          id: data.user.id,
+          inventory: inventory
+        };
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+
+        showSuccess();
+        setTimeout(() => {
+          document.getElementById('auth-page').classList.add('hidden');
+          document.getElementById('landing-page').classList.remove('hidden');
+          initializeUserSession(userData);
+        }, 1000);
+      } catch (err) {
+        showError('login-error', 'Server error');
+        btn.disabled = false;
+        btn.textContent = 'LOGIN';
+      }
+    });
+
+    // ===== REGISTER =====
+    document.getElementById('register-form-element').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('register-username').value.trim();
+      const role = document.getElementById('register-role').value;
+      const password = document.getElementById('register-password').value;
+      const confirm = document.getElementById('register-confirm').value;
+
+      clearError('register-error');
+      clearError('register-username-error');
+      clearError('register-role-error');
+      clearError('register-password-error');
+      clearError('register-confirm-error');
+
+      if (username.length < 3) { showError('register-username-error', 'Username must be at least 3 characters'); return; }
+      if (!role) { showError('register-role-error', 'Role required'); return; }
+      if (password.length < 6) { showError('register-password-error', 'Password must be at least 6 characters'); return; }
+      if (password !== confirm) { showError('register-confirm-error', 'Passwords do not match'); return; }
+
+      const btn = document.getElementById('register-submit');
+      btn.disabled = true;
+      btn.textContent = 'CREATING ACCOUNT...';
+
+      try {
+        const res = await fetch('/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, role })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError('register-error', data.error || 'Registration failed');
+          btn.disabled = false;
+          btn.textContent = 'ENTER THE SHADOWS';
+          return;
+        }
+
+        // Initialize inventory in localStorage
+        const inventory = { medkits: 3, ammo: 24, rags: 8, alcohol: 5, cards: 12 };
+        localStorage.setItem(`inventory_${data.user.id}`, JSON.stringify(inventory));
+
+        const userData = {
+          username: data.user.username,
+          role: data.user.role,
+          id: data.user.id,
+          inventory: inventory
+        };
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+
+        showSuccess();
+        setTimeout(() => {
+          document.getElementById('auth-page').classList.add('hidden');
+          document.getElementById('landing-page').classList.remove('hidden');
+          initializeUserSession(userData);
+        }, 1000);
+      } catch (err) {
+        showError('register-error', 'Server error');
+        btn.disabled = false;
+        btn.textContent = 'ENTER THE SHADOWS';
+      }
+    });
+
+    // ===== CHECK FOR EXISTING SESSION =====
+    function checkExistingSession() {
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          // Load inventory from localStorage
+          const inventory = localStorage.getItem(`inventory_${userData.id}`);
+          if (inventory) {
+            userData.inventory = JSON.parse(inventory);
+          }
+          if (userData && userData.username && userData.role) {
+            document.getElementById('auth-page').classList.add('hidden');
+            document.getElementById('landing-page').classList.remove('hidden');
+            initializeUserSession(userData);
+          }
+        } catch (e) {
+          console.error('Error parsing stored user:', e);
+          localStorage.removeItem('currentUser');
+        }
+      }
+    }
+
+    // ===== INITIALIZE USER SESSION =====
+    function initializeUserSession(userData) {
+      if (!userData || !userData.role || !userData.username) {
+        console.error('Invalid user data:', userData);
+        return;
+      }
+
+      currentUser = {
+        username: userData.username,
+        faction: userData.role.toLowerCase(),
+        role: userData.role.toLowerCase(),
+        id: userData.id,
+        inventory: userData.inventory || { medkits: 3, ammo: 24, rags: 8, alcohol: 5, cards: 12 }
+      };
+      userFaction = userData.role.toLowerCase();
+      username = userData.username;
+      userId = userData.id;
+
+      console.log('Session initialized:', { currentUser, userFaction, username, userId });
+
+      const userNameDisplay = document.getElementById('user-name-display');
+      const factionBadge = document.getElementById('user-faction-badge');
+
+      if (userNameDisplay) {
+        userNameDisplay.textContent = `OPERATIVE: ${username}`;
+      }
+
+      if (factionBadge) {
+        factionBadge.textContent = userFaction.toUpperCase();
+        factionBadge.className = `user-faction-badge faction-${userFaction}`;
+      }
+
+      // Update inventory display
+      updateInventoryDisplay();
+
+      populateSectorDropdown(userFaction);
+      populateAnalyticsZoneSelector();
+
+      // Update vaccine meter (will only show for non-FEDRA)
+      setTimeout(() => {
+        updateVaccineMeter();
+      }, 100);
+    }
+
+    // ===== UPDATE INVENTORY DISPLAY =====
+    function updateInventoryDisplay() {
+      if (currentUser && currentUser.inventory) {
+        document.getElementById('inv-medkits').textContent = currentUser.inventory.medkits || 3;
+        document.getElementById('inv-ammo').textContent = currentUser.inventory.ammo || 24;
+        document.getElementById('inv-rags').textContent = currentUser.inventory.rags || 8;
+        document.getElementById('inv-alcohol').textContent = currentUser.inventory.alcohol || 5;
+        document.getElementById('inv-cards').textContent = currentUser.inventory.cards || 12;
+      }
+    }
+
+    // ===== POPULATE SECTOR DROPDOWN =====
+    function populateSectorDropdown(faction) {
+      const sectorSelect = document.getElementById('user-sector');
+      if (!sectorSelect) return;
+
+      sectorSelect.innerHTML = '<option value="">SELECT SECTOR...</option>';
+
+      let allSectors = [];
+
+      sectorData.safe.forEach(sector => {
+        allSectors.push({ value: sector, text: sector });
+      });
+
+      sectorData.danger.forEach(sector => {
+        allSectors.push({ value: sector, text: sector + ' ☠️' });
+      });
+
+      sectorData.arcade.forEach(sector => {
+        allSectors.push({ value: sector, text: sector });
+      });
+
+      // Survivors see NO military bases
+      if (faction !== 'survivor') {
+        if (faction !== 'fedra') {
+          sectorData.firefly.forEach(sector => {
+            allSectors.push({ value: sector, text: '🔥 ' + sector });
+          });
+        }
+
+        if (faction !== 'firefly') {
+          sectorData.fedra.forEach(sector => {
+            allSectors.push({ value: sector, text: '🛡️ ' + sector });
+          });
+        }
+      }
+
+      allSectors.sort((a, b) => a.text.localeCompare(b.text));
+
+      allSectors.forEach(sector => {
+        const option = document.createElement('option');
+        option.value = sector.value;
+        option.textContent = sector.text;
+        sectorSelect.appendChild(option);
+      });
+    }
+
+    // ===== SHOW SYMPTOM ASSESSMENT =====
+    function showSymptomAssessment() {
+      if (currentUser && currentUser.faction && userFaction && username) {
+        document.getElementById('landing-page').classList.add('hidden');
+        document.getElementById('symptom-modal').classList.remove('hidden');
+        return;
+      }
+
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          if (userData && userData.role && userData.username) {
+            currentUser = {
+              username: userData.username,
+              faction: userData.role.toLowerCase(),
+              role: userData.role.toLowerCase(),
+              id: userData.id,
+              inventory: userData.inventory
+            };
+            userFaction = userData.role.toLowerCase();
+            username = userData.username;
+            userId = userData.id;
+
+            const userNameDisplay = document.getElementById('user-name-display');
+            const factionBadge = document.getElementById('user-faction-badge');
+
+            if (userNameDisplay) {
+              userNameDisplay.textContent = `OPERATIVE: ${username}`;
+            }
+
+            if (factionBadge) {
+              factionBadge.textContent = userFaction.toUpperCase();
+              factionBadge.className = `user-faction-badge faction-${userFaction}`;
+            }
+
+            updateInventoryDisplay();
+            populateSectorDropdown(userFaction);
+
+            document.getElementById('landing-page').classList.add('hidden');
+            document.getElementById('symptom-modal').classList.remove('hidden');
+            return;
+          }
+        } catch (e) {
+          console.error('Error parsing stored user:', e);
+        }
+      }
+
+      alert('Please log in first');
+      document.getElementById('landing-page').classList.add('hidden');
+      document.getElementById('auth-page').classList.remove('hidden');
+    }
+
+    // ===== MAP CLICK HANDLER =====
+    function initializeMapClickHandler() {
+      const mapContainer = document.getElementById('tactical-map');
+      if (!mapContainer) return;
+      mapContainer.removeEventListener('click', handleMapClick);
+      mapContainer.addEventListener('click', handleMapClick);
+    }
+
+    function handleMapClick() {
+      if (!userFaction) {
+        alert('Faction not detected. Please reload.');
+        return;
+      }
+
+      let mapFile = '';
+      const factionLower = userFaction.toLowerCase();
+
+      switch (factionLower) {
+        case 'survivor':
+          mapFile = 'survivors.html';
+          break;
+        case 'firefly':
+          mapFile = 'firefly.html';
+          break;
+        case 'fedra':
+          mapFile = 'fedra.html';
+          break;
+        default:
+          alert('Unknown faction: ' + userFaction);
+          return;
+      }
+
+      localStorage.setItem('returnToCommandCenter', 'true');
+      localStorage.setItem('commandCenterState', JSON.stringify(currentUser));
+
+      window.location.href = mapFile;
+    }
+
+    // ===== RETURN TO COMMAND CENTER =====
+    function checkForReturnFromMap() {
+      const shouldReturn = localStorage.getItem('returnToCommandCenter');
+
+      if (shouldReturn === 'true') {
+        localStorage.removeItem('returnToCommandCenter');
+
+        const savedState = localStorage.getItem('commandCenterState');
+        if (savedState) {
+          currentUser = JSON.parse(savedState);
+          userFaction = currentUser.faction;
+          username = currentUser.username;
+          userId = currentUser.id;
+
+          updateCommandCenter();
+
+          document.getElementById('symptom-modal').classList.add('hidden');
+          document.getElementById('command-center').classList.remove('hidden');
+          document.getElementById('ist-clock').classList.add('hidden');
+
+          setTimeout(() => {
+            initializeMapClickHandler();
+          }, 100);
+
+          localStorage.removeItem('commandCenterState');
+        }
+      }
+    }
+
+    // ===== SYMPTOM ASSESSMENT =====
+    document.getElementById('submit-symptoms').addEventListener('click', function () {
+      const fever = parseInt(document.getElementById('sym-fever').value);
+      const aggression = parseInt(document.getElementById('sym-aggression').value);
+      const vision = parseInt(document.getElementById('sym-vision').value);
+      const fungus = parseInt(document.getElementById('sym-fungus').value);
+      const sector = document.getElementById('user-sector').value;
+
+      if (!sector) {
+        alert('Please select a sector');
+        return;
+      }
+
+      if (!userFaction) {
+        alert('Session expired. Please login again.');
+        return;
+      }
+
+      let infectionTotal = fever + aggression + vision + fungus;
+      let health = Math.max(20, 100 - infectionTotal);
+
+      const isDangerZone = sectorData.danger.includes(sector);
+      if (isDangerZone) {
+        health = Math.max(20, health - 10);
+      }
+
+      let stage = "UNINFECTED";
+      if (infectionTotal > 60) stage = "BLOATER";
+      else if (infectionTotal > 45) stage = "CLICKER";
+      else if (infectionTotal > 25) stage = "STALKER";
+      else if (infectionTotal > 10) stage = "RUNNER";
+
+      const bpSys = 120 + Math.floor(infectionTotal * 0.5);
+      const bpDia = 80 + Math.floor(infectionTotal * 0.3);
+      const sugar = 95 + Math.floor(infectionTotal * 0.8);
+      const water = 75 - Math.floor(infectionTotal * 0.4);
+      const heartRate = 72 + Math.floor(infectionTotal * 0.7);
+      const oxygen = Math.max(85, 98 - Math.floor(infectionTotal * 0.3));
+
+      currentUser = {
+        ...currentUser,
+        faction: userFaction,
+        sector: sector,
+        health: health,
+        infectionStage: stage,
+        infectionPercent: infectionTotal,
+        bp: `${bpSys} / ${bpDia}`,
+        sugar: sugar + " mg/dL",
+        water: water + "%",
+        heart: heartRate + " BPM",
+        oxygen: oxygen + "%",
+        isDangerZone: isDangerZone
+      };
+
+      updateCommandCenter();
+
+      document.getElementById('symptom-modal').classList.add('hidden');
+      document.getElementById('command-center').classList.remove('hidden');
+      document.getElementById('ist-clock').classList.add('hidden');
+    });
+
+    // ===== UPDATE COMMAND CENTER =====
+    function updateCommandCenter() {
+      if (!currentUser) return;
+
+      document.getElementById('user-sector-display').textContent = currentUser.sector;
+      document.getElementById('user-status').textContent = 'OPERATIVE';
+
+      const factionDisplay = document.getElementById('user-faction-display');
+      factionDisplay.textContent = currentUser.faction.toUpperCase();
+      factionDisplay.className = `font-retro faction-${currentUser.faction}`;
+
+      document.getElementById('infection-stage-display').textContent = currentUser.infectionStage;
+      document.getElementById('health-pct').textContent = currentUser.health + '%';
+      document.getElementById('health-bar').style.width = currentUser.health + '%';
+      document.getElementById('infection-stage-detail').textContent = currentUser.infectionStage;
+
+      const sectorDetail = document.getElementById('sector-detail');
+      if (currentUser.isDangerZone) {
+        sectorDetail.innerHTML = currentUser.sector + ' <span class="text-red-500 text-sm">☠️ DANGER ZONE</span>';
+      } else {
+        sectorDetail.textContent = currentUser.sector;
+      }
+
+      document.getElementById('bio-bp').textContent = currentUser.bp;
+      document.getElementById('bio-infection').textContent = currentUser.infectionPercent + '%';
+      document.getElementById('bio-sugar').textContent = currentUser.sugar;
+      document.getElementById('bio-water').textContent = currentUser.water;
+      document.getElementById('bio-heart').textContent = currentUser.heart;
+      document.getElementById('bio-oxygen').textContent = currentUser.oxygen;
+
+      // Update inventory display
+      updateInventoryDisplay();
+
+      renderMap();
+
+      // Update location marker based on current sector
+      updateLocationMarker(currentUser.sector);
+
+      populateAnalyticsZoneSelector();
+
+      setTimeout(() => {
+        initializeMapClickHandler();
+      }, 100);
+    }
+
+    // ===== MAP RENDERING =====
+    function renderMap() {
+      const markers = document.getElementById('markers-layer');
+      markers.innerHTML = '';
+
+      const safeZones = [
+        { x: 25, y: 30, name: 'Medical Station' },
+        { x: 70, y: 65, name: 'Supply Cache' },
+        { x: 45, y: 80, name: 'Safe House' }
+      ];
+
+      const dangerZones = [
+        { x: 40, y: 50, name: 'Infected Horde' },
+        { x: 60, y: 70, name: 'Clicker Nest' },
+        { x: 30, y: 75, name: 'Contaminated Zone' }
+      ];
+
+      safeZones.forEach(zone => {
+        const m = document.createElement('div');
+        m.className = 'zone-marker marker-safe';
+        m.style.left = zone.x + '%';
+        m.style.top = zone.y + '%';
+        m.style.transform = 'translate(-50%, -50%)';
+        m.innerHTML = '🏥';
+        m.title = zone.name;
+        markers.appendChild(m);
+      });
+
+      dangerZones.forEach(zone => {
+        const m = document.createElement('div');
+        m.className = 'zone-marker marker-danger';
+        m.style.left = zone.x + '%';
+        m.style.top = zone.y + '%';
+        m.style.transform = 'translate(-50%, -50%)';
+        m.innerHTML = '☠️';
+        m.title = zone.name;
+        markers.appendChild(m);
+      });
+    }
+
+    // ===== INVENTORY MODAL (LocalStorage only) =====
+    const updateInvBtn = document.getElementById("update-inventory-btn");
+    const inventoryModal = document.getElementById("inventory-modal");
+    const saveInvBtn = document.getElementById("save-inventory-btn");
+    const closeInvBtn = document.getElementById("close-inventory-btn");
+
+    if (updateInvBtn) {
+      updateInvBtn.addEventListener("click", () => {
+        document.getElementById("inv-medkits-input").value = currentUser?.inventory?.medkits || 3;
+        document.getElementById("inv-ammo-input").value = currentUser?.inventory?.ammo || 24;
+        document.getElementById("inv-rags-input").value = currentUser?.inventory?.rags || 8;
+        document.getElementById("inv-alcohol-input").value = currentUser?.inventory?.alcohol || 5;
+        document.getElementById("inv-cards-input").value = currentUser?.inventory?.cards || 12;
+
+        inventoryModal.classList.remove("hidden");
+      });
+    }
+
+    if (closeInvBtn) {
+      closeInvBtn.addEventListener("click", () => {
+        inventoryModal.classList.add("hidden");
+      });
+    }
+
+    if (saveInvBtn) {
+      saveInvBtn.addEventListener("click", () => {
+        if (currentUser && userId) {
+          const newInventory = {
+            medkits: parseInt(document.getElementById("inv-medkits-input").value) || 0,
+            ammo: parseInt(document.getElementById("inv-ammo-input").value) || 0,
+            rags: parseInt(document.getElementById("inv-rags-input").value) || 0,
+            alcohol: parseInt(document.getElementById("inv-alcohol-input").value) || 0,
+            cards: parseInt(document.getElementById("inv-cards-input").value) || 0
+          };
+
+          // Update local state
+          currentUser.inventory = newInventory;
+          updateInventoryDisplay();
+
+          // Update localStorage
+          localStorage.setItem(`inventory_${userId}`, JSON.stringify(newInventory));
+
+          // Update currentUser in localStorage
+          const storedUser = JSON.parse(localStorage.getItem('currentUser'));
+          storedUser.inventory = newInventory;
+          localStorage.setItem('currentUser', JSON.stringify(storedUser));
+        }
+        inventoryModal.classList.add("hidden");
+      });
+    }
+
+    // ===== LOGOUT =====
+    document.getElementById('logout-btn').addEventListener('click', function () {
+      localStorage.removeItem('returnToCommandCenter');
+      localStorage.removeItem('commandCenterState');
+
+      currentUser = null;
+      userFaction = null;
+      username = null;
+      userId = null;
+      localStorage.removeItem('currentUser');
+
+      document.getElementById('command-center').classList.add('hidden');
+      document.getElementById('landing-page').classList.add('hidden');
+      document.getElementById('auth-page').classList.remove('hidden');
+      document.getElementById('ist-clock').classList.remove('hidden');
+
+      document.getElementById('sym-fever').value = '0';
+      document.getElementById('sym-aggression').value = '0';
+      document.getElementById('sym-vision').value = '0';
+      document.getElementById('sym-fungus').value = '0';
+    });
+
+    // ===== AUTO UPDATE VACCINE METER =====
+    setInterval(() => {
+      if (!document.getElementById('landing-page').classList.contains('hidden')) {
+        updateVaccineMeter();
+      }
+    }, 30000);
+
+    // ===== INITIAL CHECK =====
+    document.addEventListener('DOMContentLoaded', function () {
+      checkForReturnFromMap();
+      checkExistingSession();
+    });
+  </script>
+</body>
+
+</html>
